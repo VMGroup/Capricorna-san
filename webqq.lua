@@ -15,30 +15,12 @@ function webqq.create(self)
 
     ret.uin = 0
     ret.name = ''
+    ret.full_info = nil
 
-    ret.try_login = self.try_login
     ret.retrieve_qrcode = self.retrieve_qrcode
+    ret.is_logged_in = self.is_logged_in
     ret.login = self.login
     return ret
-end
-
-function webqq.try_login(self)
-    -- 尝试根据目前 self 内的几项信息进行登录
-    local r1_text = http.post('http://d1.web2.qq.com/channel/login2',
-        [[{'r': '{"ptwebqq":"","clientid":53233233,"psessionid":"","status":"online"}'}]])
-    local r2_text = http.get(
-        string.format('http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=%d&psessionid=%s&t=%d',
-            self.ptwebqq, self.clientid, self.psessionid, os.time() * 1000))
-    local r1 = json:decode(r1_text)
-    local r2 = json:decode(r2_text)
-    if r1['retcode'] ~= 0 or r2['retcode'] ~= 0 then
-        return false
-    else
-        self.psessionid = r1['result']['psessionid']
-        self.uin = r1['result']['uin']
-        self.vfwebqq = r2['result']['vfwebqq']
-        return true
-    end
 end
 
 function webqq.retrieve_qrcode(self)
@@ -90,24 +72,9 @@ function webqq.retrieve_qrcode(self)
     end
 end
 
-function webqq.login(self)
-    print('Logging in')
-    if not self:try_login() then
-        local logged_in = false
-        while not logged_in do
-            self:retrieve_qrcode()
-            break   -- Debug use
-            for i = 1, 10 do
-                if self:try_login() then logged_in = true; break end
-            end
-        end
-    end
-    print('Log in successful! （≧∇≦）')
+function webqq.is_logged_in(self)
     local info_resp = json:decode(http.get('http://s.web2.qq.com/api/get_self_info2'))
-    if info_resp['retcode'] ~= 0 then
-        print('Failed to retrieve account information... I don\'t know what to do either >^<')
-        return false
-    end
+    if info_resp['retcode'] ~= 0 then return false end
     local my_info = info_resp['result']
     print("Hello. I'm " .. my_info['nick'] .. ' (' .. tostring(my_info['uin']) .. ')')
     local today = os.date('%Y %m %d')
@@ -115,5 +82,14 @@ function webqq.login(self)
     if m == my_info['birthday']['month'] and d == my_info['birthday']['day'] then
         print('Happy birthday ' .. tostring(y - my_info['birthday']['year']) .. '-year-old ' .. my_info['nick'] .. '!! ☆*:.｡. o(≧▽≦)o .｡.:*☆')
     end
+    self.uin = my_info['uin']
+    self.name = my_info['nick']
+    self.full_info = my_info
     return true
+end
+
+function webqq.login(self)
+    print('Logging in')
+    while not self:is_logged_in() do self:retrieve_qrcode() end
+    print('Log in successful! （≧∇≦）')
 end
