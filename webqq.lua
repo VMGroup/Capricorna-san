@@ -17,7 +17,8 @@ function webqq.create(self)
     ret.name = ''
     ret.full_info = nil
 
-    ret.listen_group = 428754580
+    -- 哎原来这玩意不是群号。。。。。(/_ ;)
+    ret.listen_group = 2061323564
 
     ret.retrieve_qrcode = self.retrieve_qrcode
     ret.is_logged_in = self.is_logged_in
@@ -130,22 +131,25 @@ end
 function webqq.check_message(self)
     -- 只看这一个群的消息，机器人知道太多对主板不好（大雾
     -- 本方法内进行单次请求，可以用一个 while true 之类的玩意对它不停进行调用
-    --self.ptwebqq = 'b8cbd367277981ea01784a07e281dd22382d1070e73e78df16d3a0d392c64a69'
-    print(self.ptwebqq, self.clientid, self.psessionid)
+    -- 然后，关于下面这个 request 的内容……窝也不说什么了……
+    -- 原来用的是 string.format……会炸……似乎参数的顺序会影响服务器识别……
+    -- 真是。害得窝音乐会候场那一个多小时心神不宁 =^=
     local resp_text = http.post('http://d1.web2.qq.com/channel/poll2',
-        {r = string.format('{"ptwebqq": "%s", "clientid": %d, "psessionid": "%s", "key": ""}',
-            self.ptwebqq, self.clientid, self.psessionid)})
+        {r = '{"ptwebqq":"' .. self.ptwebqq .. '","clientid":' .. tostring(self.clientid)
+            .. ',"psessionid":"' .. self.psessionid .. '","key":""}'})
     local resp_obj = json:decode(resp_text)
     if resp_obj ~= nil then
         local ret_code = resp_obj['retcode']
         if ret_code == 0 then
             local messages = resp_obj['result'], i, t
             if messages ~= nil and #messages > 0 then
+                print(inspect(t))
                 for i = 1, #messages do if messages[i]['poll_type'] == 'group_message'
                     and messages[i]['value']['group_code'] == self.listen_group
                 then
                     t = messages[i]['value']
-                    print(t['time'], t['send_uin'], inspect(t['content']))
+                    --print(t['time'], t['send_uin'], inspect(t['content']))
+                    print(inspect(t))
                 end end
                 for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
                     t = messages[i]['value']
