@@ -143,18 +143,17 @@ function webqq.check_message(self)
     if resp_obj ~= nil then
         local ret_code = resp_obj['retcode']
         if ret_code == 0 then
-            local messages = resp_obj['result'], i, t
+            local messages = resp_obj['result'], i, j, t, content
             if messages ~= nil and #messages > 0 then
-                --print(inspect(messages))
                 for i = 1, #messages do if messages[i]['poll_type'] == 'group_message'
                     and messages[i]['value']['group_code'] == self.listen_group
                 then
                     t = messages[i]['value']
-                    --print(t['time'], t['send_uin'], inspect(t['content']))
-                    print(inspect(t))
-                    -- 大家好窝是echo！
+                    content = t['content']
                     -- 突然意识到 Lua 是 1-based indexing 啊啊啊啊啊 TUT
-                    self:send_message(t['content'][2])
+                    for j = 2, #content do if content[j]:find('活着') ~= nil then
+                        self:send_message('嗯我还活着ww')
+                    end end
                 end end
                 for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
                     t = messages[i]['value']
@@ -170,13 +169,10 @@ function webqq.check_message(self)
     end
 end
 
--- {"group_uin":2061323564,"content":"[\"。\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]","face":522,"clientid":53999199,"msg_id":98390001,"psessionid":"8368046764001d636f6e6e7365727665725f77656271714031302e3133332e34312e383400001ad00000066b026e040015808a206d0000000a406172314338344a69526d0000002859185d94e66218548d1ecb1a12513c86126b3afb97a3c2955b1070324790733ddb059ab166de6857"}
 function webqq.send_message(self, text)
     local req_body = '{"group_uin":' .. self.listen_group .. ',"content":"[\\"' .. text
         .. '\\",[\\"font\\",{\\"name\\":\\"宋体\\",\\"size\\":10,\\"style\\":[0,0,0],\\"color\\":\\"000000\\"}]]","face":522,"clientid":'
         .. self.clientid .. ',"msg_id":' .. tostring(math.floor(math.random() * 300000 + 200000))
         .. ',"psessionid":"' .. self.psessionid .. '"}'
-    print(req_body)
     local resp_text = http.post('http://d1.web2.qq.com/channel/send_qun_msg2', {r = req_body})
-    print(resp_text)
 end
