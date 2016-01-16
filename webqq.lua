@@ -18,7 +18,7 @@ function webqq.create(self)
     ret.full_info = nil
 
     -- 哎原来这玩意不是群号。。。。。(/_ ;)
-    ret.listen_group = 2061323564
+    ret.listen_group = 1361738520
 
     ret.retrieve_qrcode = self.retrieve_qrcode
     ret.is_logged_in = self.is_logged_in
@@ -143,7 +143,7 @@ function webqq.check_message(self)
         if ret_code == 0 then
             local messages = resp_obj['result'], i, t
             if messages ~= nil and #messages > 0 then
-                print(inspect(t))
+                --print(inspect(messages))
                 for i = 1, #messages do if messages[i]['poll_type'] == 'group_message'
                     and messages[i]['value']['group_code'] == self.listen_group
                 then
