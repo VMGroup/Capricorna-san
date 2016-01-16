@@ -17,13 +17,14 @@ function webqq.create(self)
     ret.name = ''
     ret.full_info = nil
 
-    -- 哎原来这玩意不是群号。。。。。(/_ ;)
-    -- 雾草这玩意会变？！！
-    ret.listen_group = 1361738520
+    ret.group_name = 'VOCALOID学习制作群'
+    ret.group_gid = -1
 
     ret.retrieve_qrcode = self.retrieve_qrcode
     ret.is_logged_in = self.is_logged_in
     ret.get_pass = self.get_pass
+    ret.digest = ret.digest
+    ret.find_group = self.find_group
     ret.login = self.login
     ret.check_message = self.check_message
     ret.send_message = self.send_message
@@ -123,10 +124,48 @@ function webqq.get_pass(self)
     end
 end
 
+-- Extracted from http://0.web.qstatic.com/webqqpic/pubapps/0/50/eqq.all.js
+-- P = function (b, j)   without whitespaces
+-- 如果哪天提示“无法获取群数据”大概就是服务器的算法变咯。。重新翻译一遍就好辣~
+-- digest(1786762946, 'cf13469ce5da24d724dda471303dc64a13a0dc5002ac10475f3e3af474c730ee')
+-- > '552F063C0E990189'
+function webqq.digest(b, j)
+    local a, i = {[0] = 0, 0, 0, 0}
+    for i = 1, j:len() do
+        a[(i - 1) % 4] = a[(i - 1) % 4] ~ j:byte(i)
+    end
+    local w, d = {69, 67, 79, 75}, {}
+    d[1] = b >> 24 & 255 ~ w[1]
+    d[2] = b >> 16 & 255 ~ w[2]
+    d[3] = b >> 8 & 255 ~ w[3]
+    d[4] = b & 255 ~ w[4]
+    w = {a[0], d[1], a[1], d[2], a[2], d[3], a[3], d[4]}
+    a = {[0] = '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}
+    local ret = ''
+    for i = 1, 8 do ret = ret .. a[w[i] >> 4 & 15] .. a[w[i] & 15] end
+    return ret
+end
+function webqq.find_group(self)
+    local resp_obj = json:decode(http.post('http://s.web2.qq.com/api/get_group_name_list_mask2',
+        {r = string.format('{"vfwebqq":"%s","hash":"%s"}', self.vfwebqq, webqq.digest(tonumber(self.uin), self.ptwebqq))}))
+    if resp_obj['retcode'] ~= 0 then return false end
+    local list = resp_obj['result']['gnamelist']
+    local i, idx = -1
+    for i = 1, #list do
+        if list[i]['name'] == self.group_name then
+            idx = i; break
+        end
+    end
+    if idx == -1 then print('Group "' .. self.group_name .. '"not found. Exiting'); return false end
+    self.group_gid = list[idx]['gid']
+    return true
+end
+
 function webqq.login(self)
     print('Logging in')
     while not self:is_logged_in() do self:retrieve_qrcode() end
     while not self:get_pass() do print('Cannot get the passport T^T Retrying') end
+    while not self:find_group() do print('Cannot retrieve group data T^T Retrying') end
     print('Log in successful! （≧∇≦）')
 end
 
@@ -146,7 +185,7 @@ function webqq.check_message(self)
             local messages = resp_obj['result'], i, j, t, content
             if messages ~= nil and #messages > 0 then
                 for i = 1, #messages do if messages[i]['poll_type'] == 'group_message'
-                    and messages[i]['value']['group_code'] == self.listen_group
+                    and messages[i]['value']['group_code'] == self.group_gid
                 then
                     t = messages[i]['value']
                     content = t['content']
@@ -170,7 +209,7 @@ function webqq.check_message(self)
 end
 
 function webqq.send_message(self, text)
-    local req_body = '{"group_uin":' .. self.listen_group .. ',"content":"[\\"' .. text
+    local req_body = '{"group_uin":' .. self.group_gid .. ',"content":"[\\"' .. text
         .. '\\",[\\"font\\",{\\"name\\":\\"宋体\\",\\"size\\":10,\\"style\\":[0,0,0],\\"color\\":\\"000000\\"}]]","face":522,"clientid":'
         .. self.clientid .. ',"msg_id":' .. tostring(math.floor(math.random() * 300000 + 200000))
         .. ',"psessionid":"' .. self.psessionid .. '"}'
