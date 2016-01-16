@@ -18,6 +18,7 @@ function webqq.create(self)
     ret.full_info = nil
 
     -- 哎原来这玩意不是群号。。。。。(/_ ;)
+    -- 雾草这玩意会变？！！
     ret.listen_group = 1361738520
 
     ret.retrieve_qrcode = self.retrieve_qrcode
@@ -25,6 +26,7 @@ function webqq.create(self)
     ret.get_pass = self.get_pass
     ret.login = self.login
     ret.check_message = self.check_message
+    ret.send_message = self.send_message
     return ret
 end
 
@@ -150,6 +152,9 @@ function webqq.check_message(self)
                     t = messages[i]['value']
                     --print(t['time'], t['send_uin'], inspect(t['content']))
                     print(inspect(t))
+                    -- 大家好窝是echo！
+                    -- 突然意识到 Lua 是 1-based indexing 啊啊啊啊啊 TUT
+                    self:send_message(t['content'][2])
                 end end
                 for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
                     t = messages[i]['value']
@@ -163,4 +168,15 @@ function webqq.check_message(self)
             print('(INFO) /channel/poll2: Unknown return code ' .. tostring(ret_code))
         end
     end
+end
+
+-- {"group_uin":2061323564,"content":"[\"。\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]","face":522,"clientid":53999199,"msg_id":98390001,"psessionid":"8368046764001d636f6e6e7365727665725f77656271714031302e3133332e34312e383400001ad00000066b026e040015808a206d0000000a406172314338344a69526d0000002859185d94e66218548d1ecb1a12513c86126b3afb97a3c2955b1070324790733ddb059ab166de6857"}
+function webqq.send_message(self, text)
+    local req_body = '{"group_uin":' .. self.listen_group .. ',"content":"[\\"' .. text
+        .. '\\",[\\"font\\",{\\"name\\":\\"宋体\\",\\"size\\":10,\\"style\\":[0,0,0],\\"color\\":\\"000000\\"}]]","face":522,"clientid":'
+        .. self.clientid .. ',"msg_id":' .. tostring(math.floor(math.random() * 300000 + 200000))
+        .. ',"psessionid":"' .. self.psessionid .. '"}'
+    print(req_body)
+    local resp_text = http.post('http://d1.web2.qq.com/channel/send_qun_msg2', {r = req_body})
+    print(resp_text)
 end
