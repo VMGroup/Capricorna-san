@@ -8,7 +8,7 @@ function webqq.create(self)
     local ret = {}
     -- HTTP 请求用到的参数
     ret.ptwebqq = ''
-    ret.clientid = 52333233
+    ret.clientid = 53999199
     ret.psessionid = ''
     ret.appid = 0
     ret.vfwebqq = ''
@@ -17,9 +17,13 @@ function webqq.create(self)
     ret.name = ''
     ret.full_info = nil
 
+    ret.listen_group = 428754580
+
     ret.retrieve_qrcode = self.retrieve_qrcode
     ret.is_logged_in = self.is_logged_in
+    ret.get_pass = self.get_pass
     ret.login = self.login
+    ret.check_message = self.check_message
     return ret
 end
 
@@ -88,8 +92,70 @@ function webqq.is_logged_in(self)
     return true
 end
 
+-- 获取发送/接收消息用的 session ID 等
+function webqq.get_pass(self)
+    -- Workaround. 直接从 cookies.txt 读取 Cookie……
+    local cookie_jar = io.open(http.cookie_jar, 'r')
+    local cookie_jar_contents = cookie_jar:read('a')
+    cookie_jar:close()
+    self.ptwebqq = string.match(cookie_jar_contents, 'ptwebqq%G(%w+)')
+    local r1_text = http.post('http://d1.web2.qq.com/channel/login2',
+        {r = string.format('{"ptwebqq":"%s","clientid":%d,"psessionid":"","status":"online"}', self.ptwebqq, self.clientid)})
+    local r1 = json:decode(r1_text)
+    if r1['retcode'] ~= 0 then
+        return false
+    else
+        self.psessionid = r1['result']['psessionid']
+        self.uin = r1['result']['uin']
+    end
+    local r2_text = http.get(
+        string.format('http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=%d&psessionid=%s&t=%d',
+            self.ptwebqq, self.clientid, self.psessionid, os.time() * 1000))
+    local r2 = json:decode(r2_text)
+    if r2['retcode'] ~= 0 then
+        return false
+    else
+        self.vfwebqq = r2['result']['vfwebqq']
+        return true
+    end
+end
+
 function webqq.login(self)
     print('Logging in')
     while not self:is_logged_in() do self:retrieve_qrcode() end
+    while not self:get_pass() do print('Cannot get the passport T^T Retrying') end
     print('Log in successful! （≧∇≦）')
+end
+
+function webqq.check_message(self)
+    -- 只看这一个群的消息，机器人知道太多对主板不好（大雾
+    -- 本方法内进行单次请求，可以用一个 while true 之类的玩意对它不停进行调用
+    --self.ptwebqq = 'b8cbd367277981ea01784a07e281dd22382d1070e73e78df16d3a0d392c64a69'
+    local resp_text = http.post('http://d1.web2.qq.com/channel/poll2',
+        {r = string.format('{"ptwebqq": "%s", "clientid": %d, "psessionid": "%s", "key": ""}',
+            self.ptwebqq, self.clientid, self.psessionid)})
+    local resp_obj = json:decode(resp_text)
+    if resp_obj ~= nil then
+        local ret_code = resp_obj['retcode']
+        if ret_code == 0 then
+            local messages = resp_obj['result'], i, t
+            if messages ~= nil and #messages > 0 then
+                for i = 1, #messages do if messages[i]['poll_type'] == 'group_message'
+                    and messages[i]['value']['group_code'] == self.listen_group
+                then
+                    t = messages[i]['value']
+                    print(t['time'], t['send_uin'], t['content'][1])
+                end end
+                --[[for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
+                    t = messages[i]['value']
+                    print(inspect(t))
+                end end]]
+            end
+        elseif ret_code == 116 then
+            self.ptwebqq = resp_obj['p']
+            print('(INFO) /channel/poll2: Value of ptwebqq updated')
+        else
+            print('(INFO) /channel/poll2: Unknown return code ' .. tostring(ret_code))
+        end
+    end
 end
