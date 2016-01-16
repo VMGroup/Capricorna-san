@@ -100,7 +100,7 @@ end
 function webqq.get_pass(self)
     -- Workaround. 直接从 cookies.txt 读取 Cookie……
     local cookie_jar = io.open(http.cookie_jar, 'r')
-    local cookie_jar_contents = cookie_jar:read('a')
+    local cookie_jar_contents = cookie_jar:read('*a')
     cookie_jar:close()
     self.ptwebqq = string.match(cookie_jar_contents, 'ptwebqq%G(%w+)')
     local r1_text = http.post('http://d1.web2.qq.com/channel/login2',
@@ -132,17 +132,17 @@ end
 function webqq.digest(b, j)
     local a, i = {[0] = 0, 0, 0, 0}
     for i = 1, j:len() do
-        a[(i - 1) % 4] = a[(i - 1) % 4] ~ j:byte(i)
+        a[(i - 1) % 4] = bit32.bxor(a[(i - 1) % 4], j:byte(i))
     end
     local w, d = {69, 67, 79, 75}, {}
-    d[1] = b >> 24 & 255 ~ w[1]
-    d[2] = b >> 16 & 255 ~ w[2]
-    d[3] = b >> 8 & 255 ~ w[3]
-    d[4] = b & 255 ~ w[4]
+    d[1] = bit32.bxor(math.floor(b / (2^24)) % 256, w[1])
+    d[2] = bit32.bxor(math.floor(b / (2^16)) % 256, w[2])
+    d[3] = bit32.bxor(math.floor(b / (2^8)) % 256, w[3])
+    d[4] = bit32.bxor(b % 256, w[4])
     w = {a[0], d[1], a[1], d[2], a[2], d[3], a[3], d[4]}
     a = {[0] = '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}
     local ret = ''
-    for i = 1, 8 do ret = ret .. a[w[i] >> 4 & 15] .. a[w[i] & 15] end
+    for i = 1, 8 do ret = ret .. a[math.floor(w[i] / (2^4)) % 16] .. a[w[i] % 16] end
     return ret
 end
 function webqq.find_group(self)
