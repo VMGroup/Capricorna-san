@@ -131,6 +131,7 @@ function webqq.check_message(self)
     -- 只看这一个群的消息，机器人知道太多对主板不好（大雾
     -- 本方法内进行单次请求，可以用一个 while true 之类的玩意对它不停进行调用
     --self.ptwebqq = 'b8cbd367277981ea01784a07e281dd22382d1070e73e78df16d3a0d392c64a69'
+    print(self.ptwebqq, self.clientid, self.psessionid)
     local resp_text = http.post('http://d1.web2.qq.com/channel/poll2',
         {r = string.format('{"ptwebqq": "%s", "clientid": %d, "psessionid": "%s", "key": ""}',
             self.ptwebqq, self.clientid, self.psessionid)})
@@ -144,12 +145,12 @@ function webqq.check_message(self)
                     and messages[i]['value']['group_code'] == self.listen_group
                 then
                     t = messages[i]['value']
-                    print(t['time'], t['send_uin'], t['content'][1])
+                    print(t['time'], t['send_uin'], inspect(t['content']))
                 end end
-                --[[for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
+                for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
                     t = messages[i]['value']
                     print(inspect(t))
-                end end]]
+                end end
             end
         elseif ret_code == 116 then
             self.ptwebqq = resp_obj['p']
