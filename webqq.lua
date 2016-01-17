@@ -1,6 +1,7 @@
 local inspect = require('./libs/inspect')
 local json = require('./libs/JSON')
 require './http'
+require 'zzz'
 
 webqq = {}
 
@@ -48,7 +49,8 @@ function webqq.retrieve_qrcode(self)
     while attempts < 10 do
         local start_time = os.time()
         -- 下载二维码
-        http.download('https://ssl.ptlogin2.qq.com/ptqrshow?appid=' .. appid .. '&e=0&l=L&s=8&d=72&v=4', 'login.jpg')
+        http.download('https://ssl.ptlogin2.qq.com/ptqrshow?appid=' .. appid
+            .. '&e=0&l=L&s=8&d=72&v=4&t=' .. tostring(math.random()), 'login.jpg')
         -- TODO: 增加其他系统的支持 (http://stackoverflow.com/questions/264395/)
         print('Scan the QR code (login.jpg) with QQ for Mobile to finish the log-in process')
         --os.execute('open login.jpg')
@@ -58,9 +60,10 @@ function webqq.retrieve_qrcode(self)
         local verifying_message_shown = false
         while status ~= 0 and status ~= 65 do
             -- 循环检查二维码状态
+            zzz(3)
             status_text = http.get('https://ssl.ptlogin2.qq.com/ptqrlogin?webqq_type=10&remember_uin=1&login2qq=1&aid=' .. appid
                 .. '&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-' .. tostring((os.time() - start_time) * 1000)
-                .. '&mibao_css=' .. pwsecur_css .. '&t=undefined&g=1&js_type=0&js_ver=' .. js_ver .. '&login_sig=' .. login_sig)
+                .. '&mibao_css=' .. pwsecur_css .. '&t=1&g=1&js_type=0&js_ver=' .. js_ver .. '&login_sig=' .. login_sig)
             -- status_text: ptuiCB('66','0','','0','二维码未失效。(3616543552)', '');
             status = tonumber(string.match(status_text, "ptuiCB%('(%d-)'"))
             if status == 67 and not verifying_message_shown then
@@ -103,23 +106,23 @@ function webqq.get_pass(self)
     local cookie_jar_contents = cookie_jar:read('*a')
     cookie_jar:close()
     self.ptwebqq = string.match(cookie_jar_contents, 'ptwebqq%G(%w+)')
-    local r1_text = http.post('http://d1.web2.qq.com/channel/login2',
-        {r = string.format('{"ptwebqq":"%s","clientid":%d,"psessionid":"","status":"online"}', self.ptwebqq, self.clientid)})
+    local r1_text = http.get(
+        string.format('http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=%d&psessionid=&t=%d',
+            self.ptwebqq, self.clientid, os.time() * 1000))
     local r1 = json:decode(r1_text)
     if r1['retcode'] ~= 0 then
         return false
     else
-        self.psessionid = r1['result']['psessionid']
-        self.uin = r1['result']['uin']
+        self.vfwebqq = r1['result']['vfwebqq']
     end
-    local r2_text = http.get(
-        string.format('http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=%d&psessionid=%s&t=%d',
-            self.ptwebqq, self.clientid, self.psessionid, os.time() * 1000))
+    local r2_text = http.post('http://d1.web2.qq.com/channel/login2',
+        {r = string.format('{"ptwebqq":"%s","clientid":%d,"psessionid":"","status":"online"}', self.ptwebqq, self.clientid)})
     local r2 = json:decode(r2_text)
     if r2['retcode'] ~= 0 then
         return false
     else
-        self.vfwebqq = r2['result']['vfwebqq']
+        self.psessionid = r2['result']['psessionid']
+        self.uin = r2['result']['uin']
         return true
     end
 end
@@ -157,7 +160,18 @@ function webqq.find_group(self)
         end
     end
     if idx == -1 then print('Group "' .. self.group_name .. '"not found. Exiting'); return false end
+    print(inspect(list[idx]))
     self.group_gid = list[idx]['gid']
+
+    -- 似乎并无卵用的样子……调试完全结束之前先放着好了qwq
+    local resp_obj2 = json:decode(http.post('http://s.web2.qq.com/api/get_group_info_ext2',
+        {gcode = list[idx]['code'], vfwebqq = self.vfwebqq, t = os.time() * 1000 }))
+    if resp_obj2['retcode'] ~= 0 then
+        -- 干什么好捏。。。？
+    end
+    -- 防止调试信息过多。。
+    resp_obj2['result']['ginfo']['members'] = nil
+    print(inspect(resp_obj2['result']['ginfo']))
     return true
 end
 
@@ -190,7 +204,7 @@ function webqq.check_message(self)
                     t = messages[i]['value']
                     content = t['content']
                     -- 突然意识到 Lua 是 1-based indexing 啊啊啊啊啊 TUT
-                    for j = 2, #content do if content[j]:find('活着') ~= nil then
+                    for j = 2, #content do if type(content[j]) == 'string' and content[j]:find('活着') ~= nil then
                         self:send_message('嗯我还活着ww')
                     end end
                 end end
