@@ -1,18 +1,24 @@
 http = {}
 http.cookie_jar = 'cookies.txt'
+local inspect = require('./libs/inspect')
 
-function http.get(url)
+function http.get(url, referer)
+    referer = referer or 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'
+    print('[GET]  ' .. url)
     local handle = io.popen('curl -q -k -s -b ' .. http.cookie_jar .. ' -c ' .. http.cookie_jar .. ' -X GET '
-        .. '-e "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2" '
+        .. '-e "' .. referer .. '" '
         .. '-m 10 "' .. url .. '"', 'r')
     local response = handle:read('*a')
     handle:close()
     return response
 end
 
-function http.post(url, content)
+function http.post(url, content, referer)
+    referer = referer or 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'
+    print('[POST] ' .. url)
+    print(inspect(content))
     local handle = io.popen('curl -q -k -s -b ' .. http.cookie_jar .. ' -c ' .. http.cookie_jar .. ' -X POST '
-        .. '-e "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2" '
+        .. '-e "' .. referer .. '" '
         .. '-H "Content-Type: application/x-www-form-urlencoded" '
         .. '-m 10 "' .. url .. '" -d "' .. http.urlencode(content) .. '"', 'r')
     local response = handle:read('*a')
@@ -20,9 +26,10 @@ function http.post(url, content)
     return response
 end
 
-function http.download(url, path)
+function http.download(url, path, referer)
+    referer = referer or 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'
     local handle = io.popen('curl -q -k -s -b ' .. http.cookie_jar .. ' -c ' .. http.cookie_jar .. ' -X GET '
-        .. '-e "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2" '
+        .. '-e "' .. referer .. '" '
         .. '-o "' .. path .. '" "' .. url .. '"', 'r')
     handle:close()
 end

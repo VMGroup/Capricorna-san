@@ -50,7 +50,8 @@ function webqq.retrieve_qrcode(self)
         local start_time = os.time()
         -- 下载二维码
         http.download('https://ssl.ptlogin2.qq.com/ptqrshow?appid=' .. appid
-            .. '&e=0&l=L&s=8&d=72&v=4&t=' .. tostring(math.random()), 'login.jpg')
+            .. '&e=0&l=L&s=8&d=72&v=4&t=' .. tostring(math.random()), 'login.jpg',
+            'https://ui.ptlogin2.qq.com/cgi-bin/login?daid=164&target=self&style=16&mibao_css=m_webqq&appid=501004106&enable_qlogin=0&no_verifyimg=1&s_url=http%3A%2F%2Fw.qq.com%2Fproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20131024001')
         -- TODO: 增加其他系统的支持 (http://stackoverflow.com/questions/264395/)
         print('Scan the QR code (login.jpg) with QQ for Mobile to finish the log-in process')
         --os.execute('open login.jpg')
@@ -63,7 +64,8 @@ function webqq.retrieve_qrcode(self)
             zzz(3)
             status_text = http.get('https://ssl.ptlogin2.qq.com/ptqrlogin?webqq_type=10&remember_uin=1&login2qq=1&aid=' .. appid
                 .. '&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert&action=0-0-' .. tostring((os.time() - start_time) * 1000)
-                .. '&mibao_css=' .. pwsecur_css .. '&t=1&g=1&js_type=0&js_ver=' .. js_ver .. '&login_sig=' .. login_sig)
+                .. '&mibao_css=' .. pwsecur_css .. '&t=1&g=1&js_type=0&js_ver=' .. js_ver .. '&login_sig=' .. login_sig,
+                'https://ui.ptlogin2.qq.com/cgi-bin/login?daid=164&target=self&style=16&mibao_css=m_webqq&appid=501004106&enable_qlogin=0&no_verifyimg=1&s_url=http%3A%2F%2Fw.qq.com%2Fproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20131024001')
             -- status_text: ptuiCB('66','0','','0','二维码未失效。(3616543552)', '');
             status = tonumber(string.match(status_text, "ptuiCB%('(%d-)'"))
             if status == 67 and not verifying_message_shown then
@@ -74,7 +76,10 @@ function webqq.retrieve_qrcode(self)
         if status == 0 then
             print('QR code verified! Just a few more seconds!')
             local one_more_url = string.match(status_text, "ptuiCB%('%d-',.-'%d-',.-'(.-)'")
-            http.get(one_more_url)
+            one_more_url = string.gsub(one_more_url,
+                    'http%%3A%%2F%%2Fw%.qq%.com%%2Fproxy%.html%%3Flogin2qq%%3D1',
+                    'http%%3A%%2F%%2Fw.qq.com%%2Fproxy.html%%3Flogin2qq%%3D1%%26webqq_type%%3D10')
+            http.get(one_more_url, '')
             break
         else
             print('QR code expired. Getting another...')
@@ -107,8 +112,9 @@ function webqq.get_pass(self)
     cookie_jar:close()
     self.ptwebqq = string.match(cookie_jar_contents, 'ptwebqq%G(%w+)')
     local r1_text = http.get(
-        string.format('http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=%d&psessionid=&t=%d',
-            self.ptwebqq, self.clientid, os.time() * 1000))
+        string.format('http://s.web2.qq.com/api/getvfwebqq?ptwebqq=%s&clientid=%d&psessionid=%s&t=%d',
+            self.ptwebqq, self.clientid, self.psessionid, os.time() * 1000),
+            'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1')
     local r1 = json:decode(r1_text)
     if r1['retcode'] ~= 0 then
         return false
@@ -116,7 +122,8 @@ function webqq.get_pass(self)
         self.vfwebqq = r1['result']['vfwebqq']
     end
     local r2_text = http.post('http://d1.web2.qq.com/channel/login2',
-        {r = string.format('{"ptwebqq":"%s","clientid":%d,"psessionid":"","status":"online"}', self.ptwebqq, self.clientid)})
+        {r = string.format('{"ptwebqq":"%s","clientid":%d,"psessionid":"%s","status":"online"}', self.ptwebqq, self.clientid, self.psessionid)},
+        'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2')
     local r2 = json:decode(r2_text)
     if r2['retcode'] ~= 0 then
         return false
@@ -150,7 +157,8 @@ function webqq.digest(b, j)
 end
 function webqq.find_group(self)
     local resp_obj = json:decode(http.post('http://s.web2.qq.com/api/get_group_name_list_mask2',
-        {r = string.format('{"vfwebqq":"%s","hash":"%s"}', self.vfwebqq, webqq.digest(tonumber(self.uin), self.ptwebqq))}))
+        {r = string.format('{"vfwebqq":"%s","hash":"%s"}', self.vfwebqq, webqq.digest(tonumber(self.uin), self.ptwebqq))},
+        'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'))
     if resp_obj['retcode'] ~= 0 then return false end
     local list = resp_obj['result']['gnamelist']
     local i, idx = -1
@@ -191,13 +199,15 @@ function webqq.check_message(self)
     -- 真是。害得窝音乐会候场那一个多小时心神不宁 =^=
     local resp_text = http.post('http://d1.web2.qq.com/channel/poll2',
         {r = '{"ptwebqq":"' .. self.ptwebqq .. '","clientid":' .. tostring(self.clientid)
-            .. ',"psessionid":"' .. self.psessionid .. '","key":""}'})
+            .. ',"psessionid":"' .. self.psessionid .. '","key":""}'},
+        'http://d1.web2.qq.com/proxy.html?v=20030916001&callback=1&id=2')
     local resp_obj = json:decode(resp_text)
     if resp_obj ~= nil then
         local ret_code = resp_obj['retcode']
         if ret_code == 0 then
             local messages = resp_obj['result'], i, j, t, content
             if messages ~= nil and #messages > 0 then
+                print(inspect(messages))
                 for i = 1, #messages do if messages[i]['poll_type'] == 'group_message'
                     and messages[i]['value']['group_code'] == self.group_gid
                 then
@@ -206,6 +216,9 @@ function webqq.check_message(self)
                     -- 突然意识到 Lua 是 1-based indexing 啊啊啊啊啊 TUT
                     for j = 2, #content do if type(content[j]) == 'string' and content[j]:find('活着') ~= nil then
                         self:send_message('嗯我还活着ww')
+                    end end
+                    for j = 2, #content do if type(content[j]) == 'string' and content[j] == '。' then
+                        self:send_message('。')
                     end end
                 end end
                 for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
@@ -227,5 +240,6 @@ function webqq.send_message(self, text)
         .. '\\",[\\"font\\",{\\"name\\":\\"宋体\\",\\"size\\":10,\\"style\\":[0,0,0],\\"color\\":\\"000000\\"}]]","face":522,"clientid":'
         .. self.clientid .. ',"msg_id":' .. tostring(math.floor(math.random() * 300000 + 200000))
         .. ',"psessionid":"' .. self.psessionid .. '"}'
-    local resp_text = http.post('http://d1.web2.qq.com/channel/send_qun_msg2', {r = req_body})
+    local resp_text = http.post('http://d1.web2.qq.com/channel/send_qun_msg2', {r = req_body}, 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2')
+    print(resp_text)
 end
