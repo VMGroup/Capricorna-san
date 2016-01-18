@@ -29,6 +29,7 @@ function webqq.create(self)
     ret.login = self.login
     ret.check_message = self.check_message
     ret.send_message = self.send_message
+    ret.get_friend_info = self.get_friend_info
     return ret
 end
 
@@ -213,12 +214,22 @@ function webqq.check_message(self)
                 then
                     t = messages[i]['value']
                     content = t['content']
+                    -- 取得发送者的信息（主要是QQ号和昵称）
+                    local sender = self:get_friend_info(t['send_uin'])
+                    print(inspect(sender))
                     -- 突然意识到 Lua 是 1-based indexing 啊啊啊啊啊 TUT
-                    for j = 2, #content do if type(content[j]) == 'string' and content[j]:find('活着') ~= nil then
-                        self:send_message('嗯我还活着ww')
-                    end end
-                    for j = 2, #content do if type(content[j]) == 'string' and content[j] == '。' then
-                        self:send_message('。')
+                    for j = 2, #content do if type(content[j]) == 'string' then
+                        if content[j]:find('活着') ~= nil then
+                            self:send_message('嗯我还活着ww')
+                        elseif content[j] == '。' then
+                            self:send_message('。')
+                        elseif content[j]:find('机器人') ~= nil then
+                            self:send_message('叫我嘛。。？')
+                        elseif sender and content[j] == '早' then
+                            self:send_message(sender['nick'] .. ' 早上好～')
+                        elseif sender and content[j]:find('晚安') then
+                            self:send_message(sender['nick'] .. ' 晚安～')
+                        end
                     end end
                 end end
                 for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
@@ -242,4 +253,16 @@ function webqq.send_message(self, text)
         .. ',"psessionid":"' .. self.psessionid .. '"}'
     local resp_text = http.post('http://d1.web2.qq.com/channel/send_qun_msg2', {r = req_body}, 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2')
     print(resp_text)
+end
+
+-- 并不一定是好友
+function webqq.get_friend_info(self, id)
+    local resp = json:decode(http.get(string.format(
+        'http://s.web2.qq.com/api/get_friend_info2?tuin=%d&vfwebqq=%s&clientid=%d&psessionid=%s&t=%d',
+        id, self.vfwebqq, self.clientid, self.psessionid, tostring(os.time() * 1000))))
+    if not resp or resp['retcode'] ~= 0 then
+        return nil
+    else
+        return resp['result']
+    end
 end
