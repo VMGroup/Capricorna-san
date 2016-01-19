@@ -5,6 +5,7 @@ local bot = webqq:create()
 bot:login()
 -- 加载所有AI模块
 local loader = require('./ai/loader')
+bot:init_ai_storage()
 loader(bot)
 -- Here we go (๑•̀ㅂ•́)و✧
 while true do

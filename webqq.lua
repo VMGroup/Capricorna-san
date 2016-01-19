@@ -32,7 +32,10 @@ function webqq.create(self)
     ret.send_message = self.send_message
     ret.get_friend_info = self.get_friend_info
 
+    ret.ai_storage = {}
     ret.handler_entries = {}
+    ret.init_ai_storage = self.init_ai_storage
+    ret.save_ai_storage = self.save_ai_storage
     ret.register_handler = self.register_handler
     ret.handle_message = self.handle_message
     return ret
@@ -245,6 +248,7 @@ function webqq.check_message(self)
                         print(inspect(t))
                     end
                 end
+                self:save_ai_storage()
             end
         elseif ret_code == 116 then
             self.ptwebqq = resp_obj['p']
@@ -285,6 +289,20 @@ function webqq.get_friend_info(self, id)
     end
 end
 
+
+-- 加载AI存储的数据
+function webqq.init_ai_storage(self)
+    local f = io.open('./ai_storage.txt', 'a')
+    f:close()
+    self.ai_storage = dofile('./ai_storage.txt')
+end
+-- 把AI存储的数据写入到文件
+function webqq.save_ai_storage(self)
+    local f = io.open('./ai_storage.txt', 'w')
+    f:write('return ')
+    f:write(inspect(self.ai_storage))
+    f:close()
+end
 -- AI的核心就是这里辣
 -- 通过 self.members[uin] 可以得到发送者的信息（主要就是QQ号和昵称。。）
 --[[ messages: { { "font", {
