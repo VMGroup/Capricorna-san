@@ -31,6 +31,10 @@ function webqq.create(self)
     ret.check_message = self.check_message
     ret.send_message = self.send_message
     ret.get_friend_info = self.get_friend_info
+
+    ret.handler_entries = {}
+    ret.register_handler = self.register_handler
+    ret.handle_message = self.handle_message
     return ret
 end
 
@@ -227,35 +231,20 @@ function webqq.check_message(self)
             local messages = resp_obj['result'], i, j, t, content
             if messages ~= nil and #messages > 0 then
                 print(inspect(messages))
-                for i = 1, #messages do if messages[i]['poll_type'] == 'group_message'
-                    and messages[i]['value']['group_code'] == self.group_gid
-                then
-                    t = messages[i]['value']
-                    content = t['content']
-                    -- 取得发送者的信息（主要是QQ号和昵称）
-                    local sender = self.members[t['send_uin']]
-                    print(inspect(sender))
-                    -- 突然意识到 Lua 是 1-based indexing 啊啊啊啊啊 TUT
-                    for j = 2, #content do if type(content[j]) == 'string' then
-                        if content[j]:find('活着') ~= nil then
-                            self:send_message('嗯我还活着ww')
-                        elseif content[j] == '。' then
-                            self:send_message('。')
-                        elseif content[j]:find('机器人') ~= nil then
-                            self:send_message('叫我嘛。。？')
-                        elseif sender and content[j] == '早' then
-                            self:send_message(sender['card'] .. ' 早上好～')
-                        elseif sender and content[j]:find('晚安') then
-                            self:send_message(sender['card'] .. ' 晚安～')
-                        elseif sender and content[j] == 'hello' then
-                            self:send_message({'@' .. sender['card'], ' ', 'hi'})
-                        end
-                    end end
-                end end
-                for i = 1, #messages do if messages[i]['poll_type'] == 'message' then
-                    t = messages[i]['value']
-                    print(inspect(t))
-                end end
+                for i = 1, #messages do
+                    if messages[i]['poll_type'] == 'group_message'
+                        and messages[i]['value']['group_code'] == self.group_gid
+                    then
+                        t = messages[i]['value']
+                        -- 取得发送者的信息（主要是QQ号和昵称）
+                        self:handle_message(t['send_uin'], t['content'])
+                    elseif messages[i]['poll_type'] == 'message' then
+                        -- TODO: 自动回复好友信息 = =
+                        -- TODO: 还要自动回复临时会话 = =
+                        t = messages[i]['value']
+                        print(inspect(t))
+                    end
+                end
             end
         elseif ret_code == 116 then
             self.ptwebqq = resp_obj['p']
@@ -294,4 +283,30 @@ function webqq.get_friend_info(self, id)
     else
         return resp['result']
     end
+end
+
+-- AI的核心就是这里辣
+-- 通过 self.members[uin] 可以得到发送者的信息（主要就是QQ号和昵称。。）
+--[[ messages: { { "font", {
+    color = "000000",
+    name = "微软雅黑",
+    size = 10,
+    style = { 0, 0, 0 }
+    } }, "@某昨的机器人", "", " hello" }]]
+function webqq.register_handler(self, checker, action)
+    self.handler_entries[#self.handler_entries + 1] = {
+        checker = checker,
+        action = action
+    }
+end
+function webqq.handle_message(self, uin, messages)
+    local i
+    for i = 1, #self.handler_entries do
+        if self.handler_entries[i].checker(self, uin, messages) then
+            self.handler_entries[i].action(self, uin, messages)
+            break
+        end
+    end
+    -- 如果没有一个handler匹配的话就会窥屏
+    -- TODO: 要不要加一个default_handler用于取代窥屏的动作。。？
 end
