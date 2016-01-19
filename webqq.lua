@@ -20,6 +20,7 @@ function webqq.create(self)
 
     ret.group_name = 'VOCALOID学习制作群'
     ret.group_gid = -1
+    ret.members = {}
 
     ret.retrieve_qrcode = self.retrieve_qrcode
     ret.is_logged_in = self.is_logged_in
@@ -172,15 +173,32 @@ function webqq.find_group(self)
     print(inspect(list[idx]))
     self.group_gid = list[idx]['gid']
 
-    -- 似乎并无卵用的样子……调试完全结束之前先放着好了qwq
+    -- 取得成员列表！
     local resp_obj2 = json:decode(http.post('http://s.web2.qq.com/api/get_group_info_ext2',
         {gcode = list[idx]['code'], vfwebqq = self.vfwebqq, t = os.time() * 1000 }))
     if resp_obj2['retcode'] ~= 0 then
-        -- 干什么好捏。。。？
+        print('[WARN] Cannot retrieve member list :( Some functionalities may not work')
+    else
+        --print(inspect(resp_obj2['result']))
+        local cards = {}
+        local card_list = resp_obj2['result']['cards']
+        local member_list = resp_obj2['result']['minfo']
+        local i, t
+        for i = 1, #card_list do
+            cards[card_list[i]['muin']] = card_list[i]['card']
+        end
+        for i = 1, #member_list do
+            t = member_list[i]['uin']
+            if cards[t] == nil then
+                cards[t] = member_list[i]['nick']
+            end
+            self.members[t] = member_list[i]
+        end
+        for i, t in pairs(cards) do
+            self.members[i]['card'] = t
+        end
+        print(inspect(self.members))
     end
-    -- 防止调试信息过多。。
-    resp_obj2['result']['ginfo']['members'] = nil
-    print(inspect(resp_obj2['result']['ginfo']))
     return true
 end
 
@@ -215,7 +233,7 @@ function webqq.check_message(self)
                     t = messages[i]['value']
                     content = t['content']
                     -- 取得发送者的信息（主要是QQ号和昵称）
-                    local sender = self:get_friend_info(t['send_uin'])
+                    local sender = self.members[t['send_uin']]
                     print(inspect(sender))
                     -- 突然意识到 Lua 是 1-based indexing 啊啊啊啊啊 TUT
                     for j = 2, #content do if type(content[j]) == 'string' then
@@ -226,9 +244,11 @@ function webqq.check_message(self)
                         elseif content[j]:find('机器人') ~= nil then
                             self:send_message('叫我嘛。。？')
                         elseif sender and content[j] == '早' then
-                            self:send_message(sender['nick'] .. ' 早上好～')
+                            self:send_message(sender['card'] .. ' 早上好～')
                         elseif sender and content[j]:find('晚安') then
-                            self:send_message(sender['nick'] .. ' 晚安～')
+                            self:send_message(sender['card'] .. ' 晚安～')
+                        elseif sender and content[j] == 'hello' then
+                            self:send_message({'@' .. sender['card'], ' ', 'hi'})
                         end
                     end end
                 end end
@@ -247,15 +267,24 @@ function webqq.check_message(self)
 end
 
 function webqq.send_message(self, text)
-    local req_body = '{"group_uin":' .. self.group_gid .. ',"content":"[\\"' .. text
-        .. '\\",[\\"font\\",{\\"name\\":\\"宋体\\",\\"size\\":10,\\"style\\":[0,0,0],\\"color\\":\\"000000\\"}]]","face":522,"clientid":'
+    local req_body = '{"group_uin":' .. self.group_gid .. ',"content":"['
+    if type(text) == 'string' then
+        req_body = req_body .. '\\"' .. text .. '\\",'
+    else
+        for i = 1, #text do
+            req_body = req_body .. '\\"' .. text[i] .. '\\",'
+        end
+    end
+    req_body = req_body
+        .. '[\\"font\\",{\\"name\\":\\"宋体\\",\\"size\\":10,\\"style\\":[0,0,0],\\"color\\":\\"000000\\"}]]","face":522,"clientid":'
         .. self.clientid .. ',"msg_id":' .. tostring(math.floor(math.random() * 300000 + 200000))
         .. ',"psessionid":"' .. self.psessionid .. '"}'
     local resp_text = http.post('http://d1.web2.qq.com/channel/send_qun_msg2', {r = req_body}, 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2')
     print(resp_text)
 end
 
--- 并不一定是好友
+-- 一定要是好友
+-- 这个暂时并没有用的样子。。所有群成员的信息在登录的时候就取回了。。
 function webqq.get_friend_info(self, id)
     local resp = json:decode(http.get(string.format(
         'http://s.web2.qq.com/api/get_friend_info2?tuin=%d&vfwebqq=%s&clientid=%d&psessionid=%s&t=%d',
