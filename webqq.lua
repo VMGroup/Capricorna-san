@@ -1,7 +1,8 @@
-local inspect = require('./libs/inspect')
-local json = require('./libs/JSON')
+inspect = inspect or require('./libs/inspect')
+json = json or require('./libs/JSON')
 require './http'
 require 'zzz'
+require './ai/loader'
 
 webqq = {}
 
@@ -32,11 +33,8 @@ function webqq.create(self)
     ret.send_message = self.send_message
     ret.get_friend_info = self.get_friend_info
 
-    ret.ai_storage = {}
-    ret.handler_entries = {}
-    ret.init_ai_storage = self.init_ai_storage
-    ret.save_ai_storage = self.save_ai_storage
-    ret.register_handler = self.register_handler
+    ret.ai = nil
+    ret.init_ai = self.init_ai
     ret.handle_message = self.handle_message
     return ret
 end
@@ -215,6 +213,8 @@ function webqq.login(self)
     while not self:get_pass() do print('Cannot get the passport T^T Retrying') end
     while not self:find_group() do print('Cannot retrieve group data T^T Retrying') end
     print('Log in successful! （≧∇≦）')
+    self:init_ai()
+    print('AI is up! ☆*:.｡. o(≧▽≦)o .｡.:*☆')
 end
 
 function webqq.check_message(self)
@@ -248,7 +248,6 @@ function webqq.check_message(self)
                         print(inspect(t))
                     end
                 end
-                self:save_ai_storage()
             end
         elseif ret_code == 116 then
             self.ptwebqq = resp_obj['p']
@@ -289,42 +288,18 @@ function webqq.get_friend_info(self, id)
     end
 end
 
+-- 加载AI
+function webqq.init_ai(self)
+    self.ai = ai:create(self.full_info, self.members, function (m) self:send_message(m) end)
+end
 
--- 加载AI存储的数据
-function webqq.init_ai_storage(self)
-    local f = io.open('./ai_storage.txt', 'a')
-    f:close()
-    self.ai_storage = dofile('./ai_storage.txt')
-end
--- 把AI存储的数据写入到文件
-function webqq.save_ai_storage(self)
-    local f = io.open('./ai_storage.txt', 'w')
-    f:write('return ')
-    f:write(inspect(self.ai_storage))
-    f:close()
-end
--- AI的核心就是这里辣
--- 通过 self.members[uin] 可以得到发送者的信息（主要就是QQ号和昵称。。）
---[[ messages: { { "font", {
-    color = "000000",
-    name = "微软雅黑",
-    size = 10,
-    style = { 0, 0, 0 }
-    } }, "@某昨的机器人", "", " hello" }]]
-function webqq.register_handler(self, checker, action)
-    self.handler_entries[#self.handler_entries + 1] = {
-        checker = checker,
-        action = action
-    }
-end
 function webqq.handle_message(self, uin, messages)
     local i
-    for i = 1, #self.handler_entries do
-        if self.handler_entries[i].checker(self, uin, messages) then
-            self.handler_entries[i].action(self, uin, messages)
-            break
+    local concat = ''
+    for i = 1, #messages do
+        if type(messages[i]) == 'string' then 
+            concat = concat .. messages[i]
         end
     end
-    -- 如果没有一个handler匹配的话就会窥屏
-    -- TODO: 要不要加一个default_handler用于取代窥屏的动作。。？
+    self.ai:handle(uin, concat)
 end

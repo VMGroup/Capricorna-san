@@ -1,16 +1,19 @@
-ai.init_storage.dot_counter = { total = 0, members = {} }
+ai.register_handler('dot_counter',
+    function (self, storage)
+        storage.total = storage.total or 0
+        storage.members = storage.members or {}
+    end,
 
-ai.register_handler(function (self, uin, messages)
-    for i = 1, #messages do
-        if type(messages[i]) == 'string' and messages[i] == '。' then
-            return true
-        end
+    function (self, uin, message, storage)
+        if message == '。' then return 1
+        else return 0 end
+    end,
+
+    function (self, uin, message, storage)
+        storage.total = storage.total + 1
+        storage.members[uin] = (storage.members[uin] or 0) + 1
+        self.send_message('↑' .. self.member_info[uin]['card'] .. ' 的第'
+            .. storage.members[uin] .. '个豆豆，总共第' .. storage.total
+            .. '个豆豆')
     end
-    return false
-end, function (self, uin, messages)
-    self.ai_storage.dot_counter.total = self.ai_storage.dot_counter.total + 1
-    self.ai_storage.dot_counter.members[uin] = (self.ai_storage.dot_counter.members[uin] or 0) + 1
-    self:send_message('↑' .. self.members[uin]['card'] .. ' 的第'
-        .. self.ai_storage.dot_counter.members[uin] .. '个豆豆，总共第' .. self.ai_storage.dot_counter.total
-        .. '个豆豆')
-end)
+)

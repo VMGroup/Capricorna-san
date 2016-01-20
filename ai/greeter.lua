@@ -1,10 +1,12 @@
-ai.register_handler(function (self, uin, messages)
-    for i = 1, #messages do
-        if type(messages[i]) == 'string' and messages[i] == 'ww' then
-            return true
-        end
+ai.register_handler('greeter',
+    function () end,
+
+    function (self, uin, message)
+        if message == 'ww' then return 1
+        else return 0 end
+    end,
+
+    function (self, uin, message)
+        self.send_message('wwwwwwwwwww')
     end
-    return false
-end, function (self, uin, messages)
-    self:send_message('wwwwwwwwwww')
-end)
+)
