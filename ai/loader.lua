@@ -14,6 +14,11 @@ function ai.register_handler(module, init, checker, action)
         { module = module, init = init, checker = checker, action = action }
 end
 
+-- A helper function
+function ai.rand_from(t)
+    return t[math.floor(math.random() * #t) + 1]
+end
+
 require 'ai/greeter'
 require 'ai/dot_counter'
 
