@@ -40,7 +40,7 @@ ai.register_handler('greeter',
         elseif ai.date.time_id >= 1830 and ai.date.time_id < 2230
             and storage.last_konbanwa ~= ai.date.day_id and (nyanpasu or message:find('晚好') or message:find('空帮')) -- 汪
         then return 1
-        elseif ai.date.time_id >= 2230 or ai.date.time_id < 0100
+        elseif (ai.date.time_id >= 2230 or ai.date.time_id < 0100)
             and (message:find('晚安') or message:find('yasumi'))
         then return 1
         else return 0 end
@@ -48,13 +48,13 @@ ai.register_handler('greeter',
 
     function (self, uid, message, storage)
         if ai.date.time_id >= 2230 or ai.date.time_id < 0100 then
-            self.send_message(string.format(ai.rand_from(oyasumi_msg), self.member_info[uin]['card']))
+            self.send_message(string.format(ai.rand_from(oyasumi_msg), self.member_info[uid]['card']))
         elseif ai.date.time_id >= 1830 then
             storage.last_konbanwa = ai.date.day_id
-            self.send_message(string.format(ai.rand_from(konbanwa_msg), self.member_info[uin]['card']))
+            self.send_message(string.format(ai.rand_from(konbanwa_msg), self.member_info[uid]['card']))
         else
             storage.last_ohayo = ai.date.day_id
-            self.send_message(string.format(ai.rand_from(ohayo_msg), self.member_info[uin]['card']))
+            self.send_message(string.format(ai.rand_from(ohayo_msg), self.member_info[uid]['card']))
         end
     end
 )
