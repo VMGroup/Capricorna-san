@@ -1,7 +1,7 @@
 inspect = inspect or require('./libs/inspect')
 require 'saver'
 
-ai = { handlers = {} }
+ai = { handlers = {}, timers = {} }
 -- AI的核心就是这里辣
 -- module:  模块名称，用于读取存储的数据
 -- init:    初始化方法
@@ -15,6 +15,17 @@ function ai.register_handler(module, init, checker, action)
         { module = module, init = init, checker = checker, action = action }
 end
 
+-- module:   模块名称
+-- min_intv: 两次触发的最小时间间隔（秒），一般可以设为触发执行间隔的一半左右。。（随便啦
+ai.times = { season = 7884000, month = 2592000, week = 604800, day = 86400, hour = 3600, minute = 60, second = 1 }
+-- checker:  检查器，返回 true/false
+-- action:   执行的动作
+-- XXX: 初始化。。还需要嘛。。？？
+function ai.register_timer(module, min_intv, checker, action)
+    ai.timers[#ai.timers + 1] =
+        { module = module, min_intv = min_intv, checker = checker, action = action, last_triggered = 0 }
+end
+
 -- A helper function
 function ai.rand_from(t)
     return t[math.floor(math.random() * #t) + 1]
@@ -23,11 +34,14 @@ function ai.update_time()
     ai.date = os.date('*t')
     ai.date.day_id = ai.date.year * 370 + ai.date.yday
     ai.date.time_id = ai.date.hour * 10000 + ai.date.min * 100 + ai.date.sec
+    ai.date.epoch = os.time()
 end
 ai.update_time()
 
 require 'ai/greeter'
 require 'ai/dot_counter'
+
+require 'ai/wakeup'
 
 -- self_info:    机器人帐号的资料，一个 table
 -- members_info: 群成员的资料，以 uin 作为索引，一个 number -> table 的 table
@@ -41,6 +55,7 @@ function ai.create(self, self_info, members_info, ticket)
     ret.init_storage = self.init_storage
     ret.save_storage = self.save_storage
     ret.handle = self.handle
+    ret.check_time = self.check_time
 
     ret:init_storage()
     ret.storage = ret.storage or {}
@@ -50,14 +65,20 @@ function ai.create(self, self_info, members_info, ticket)
         ai.handlers[i].init(ret, t)
         ret.storage[ai.handlers[i].module] = t
     end
+    for i = 1, #ai.timers do
+        t = ret.storage[ai.timers[i].module] or {}
+        ret.storage[ai.timers[i].module] = t
+    end
     return ret
 end
 
 -- 加载AI存储的数据
+-- 在创建时自动调用
 function ai.init_storage(self)
     self.storage = saver.load('./ai_storage.txt')
 end
 -- 把AI存储的数据写入到文件
+-- 需要手动调用。。。（这个设计模式似乎略乱诶QAQ）
 function ai.save_storage(self)
     saver.save('./ai_storage.txt', self.storage)
 end
@@ -78,5 +99,18 @@ function ai.handle(self, uin, message)
     end
     -- 如果没有一个handler匹配的话就会窥屏
     -- TODO: 要不要加一个default_handler用于取代窥屏的动作。。？
-    self:save_storage()
+end
+
+function ai.check_time(self)
+    ai.update_time()
+    local i, t
+    for i = 1, #ai.timers do
+        t = ai.timers[i]
+        if (ai.date.epoch >= t.last_triggered + t.min_intv)
+            and t.checker(self, self.storage[ai.timers[i].module])
+        then
+            t.action(self, self.storage[ai.timers[i].module])
+            t.last_triggered = ai.date.epoch
+        end
+    end
 end

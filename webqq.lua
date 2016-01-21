@@ -38,6 +38,7 @@ function webqq.create(self)
     ret.ai = nil
     ret.init_ai = self.init_ai
     ret.handle_message = self.handle_message
+    ret.check_time = self.check_time
     return ret
 end
 
@@ -272,6 +273,9 @@ function webqq.check_message(self)
             print('(INFO) /channel/poll2: Unknown return code ' .. tostring(ret_code))
         end
     end
+    -- ……然后抬头望向挂钟……
+    self:check_time()
+    self.ai:save_storage()
 end
 
 function webqq.send_message(self, text)
@@ -330,4 +334,8 @@ function webqq.handle_message(self, account, messages)
     end
     print(account, concat)
     self.ai:handle(account, concat)
+end
+
+function webqq.check_time(self)
+    self.ai:check_time()
 end

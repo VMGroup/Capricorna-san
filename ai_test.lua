@@ -22,6 +22,7 @@ local t = io.read('*l')
 local sender = 12
 local try_sender
 while t do
+    yagi:check_time()
     try_sender = string.match(t, 'sender (%d+)')
     if try_sender then
         try_sender = tonumber(try_sender)
