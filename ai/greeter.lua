@@ -32,7 +32,7 @@ ai.register_handler('greeter',
         storage.last_konbanwa = storage.last_konbanwa or 0
     end,
 
-    function (self, uin, message, storage)
+    function (self, uid, message, storage)
         local nyanpasu = message:find('にゃんぱす') or message:find('喵帕斯')
         if ai.date.time_id >= 0630 and ai.date.time_id < 0900
             and storage.last_ohayo ~= ai.date.day_id and (nyanpasu or message:find('早') or message:find('ohayo'))
@@ -46,7 +46,7 @@ ai.register_handler('greeter',
         else return 0 end
     end,
 
-    function (self, uin, message, storage)
+    function (self, uid, message, storage)
         if ai.date.time_id >= 2230 then
             self.send_message(string.format(ai.rand_from(oyasumi_msg), self.member_info[uin]['card']))
         elseif ai.date.time_id >= 1830 then

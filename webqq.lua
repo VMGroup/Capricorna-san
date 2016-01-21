@@ -22,6 +22,7 @@ function webqq.create(self)
     ret.group_name = 'VOCALOID学习制作群'
     ret.group_gid = -1
     ret.members = {}
+    ret.account_with_uin = nil
 
     ret.retrieve_qrcode = self.retrieve_qrcode
     ret.is_logged_in = self.is_logged_in
@@ -191,7 +192,7 @@ function webqq.find_group(self)
         local cards = {}
         local card_list = resp_obj2['result']['cards']
         local member_list = resp_obj2['result']['minfo']
-        local i, t
+        local i, t, p
         for i = 1, #card_list do
             cards[card_list[i]['muin']] = card_list[i]['card']
         end
@@ -200,23 +201,25 @@ function webqq.find_group(self)
             if cards[t] == nil then
                 cards[t] = member_list[i]['nick']
             end
-            self.members[t] = member_list[i]
             if account_map.psessionid ~= self.psessionid then
                 -- 取得用户QQ帐号
-                self.members[t]['account'] = self:get_user_account(t)
+                p = self:get_user_account(t)
                 print(string.format('%d / %d', i, #member_list))
-                account_map[t] = self.members[t]['account']
+                member_list[i]['account'] = p
+                account_map[t] = p
             else
-                self.members[t]['account'] = account_map[t]
+                member_list[i]['account'] = account_map[t]
             end
+            self.members[member_list[i]['account']] = member_list[i]
         end
         for i, t in pairs(cards) do
-            self.members[i]['card'] = t
+            self.members[account_map[i]]['card'] = t
         end
         account_map.psessionid = self.psessionid
         saver.save('webqq_cache.txt', account_map)
         print(inspect(self.members))
     end
+    self.account_with_uin = account_map
     return true
 end
 
@@ -253,7 +256,7 @@ function webqq.check_message(self)
                     then
                         t = messages[i]['value']
                         -- 取得发送者的信息（主要是QQ号和昵称）
-                        self:handle_message(t['send_uin'], t['content'])
+                        self:handle_message(self.account_with_uin[t['send_uin']], t['content'])
                     elseif messages[i]['poll_type'] == 'message' then
                         -- TODO: 自动回复好友信息 = =
                         -- TODO: 还要自动回复临时会话 = =
@@ -317,7 +320,7 @@ function webqq.init_ai(self)
     self.ai = ai:create(self.full_info, self.members, function (m) self:send_message(m) end)
 end
 
-function webqq.handle_message(self, uin, messages)
+function webqq.handle_message(self, account, messages)
     local i
     local concat = ''
     for i = 1, #messages do
@@ -325,5 +328,6 @@ function webqq.handle_message(self, uin, messages)
             concat = concat .. messages[i]
         end
     end
-    self.ai:handle(uin, concat)
+    print(account, concat)
+    self.ai:handle(account, concat)
 end
