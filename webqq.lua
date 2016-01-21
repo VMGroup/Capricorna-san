@@ -32,6 +32,7 @@ function webqq.create(self)
     ret.check_message = self.check_message
     ret.send_message = self.send_message
     ret.get_friend_info = self.get_friend_info
+    ret.get_user_account = self.get_user_account
 
     ret.ai = nil
     ret.init_ai = self.init_ai
@@ -177,7 +178,9 @@ function webqq.find_group(self)
     if idx == -1 then print('Group "' .. self.group_name .. '"not found. Exiting'); return false end
     print(inspect(list[idx]))
     self.group_gid = list[idx]['gid']
-
+    
+    print('Retrieving group info...')
+    local account_map = saver.load('webqq_cache.txt') or { psessionid = '' }
     -- 取得成员列表！
     local resp_obj2 = json:decode(http.post('http://s.web2.qq.com/api/get_group_info_ext2',
         {gcode = list[idx]['code'], vfwebqq = self.vfwebqq, t = os.time() * 1000 }))
@@ -198,10 +201,20 @@ function webqq.find_group(self)
                 cards[t] = member_list[i]['nick']
             end
             self.members[t] = member_list[i]
+            if account_map.psessionid ~= self.psessionid then
+                -- 取得用户QQ帐号
+                self.members[t]['account'] = self:get_user_account(t)
+                print(string.format('%d / %d', i, #member_list))
+                account_map[t] = self.members[t]['account']
+            else
+                self.members[t]['account'] = account_map[t]
+            end
         end
         for i, t in pairs(cards) do
             self.members[i]['card'] = t
         end
+        account_map.psessionid = self.psessionid
+        saver.save('webqq_cache.txt', account_map)
         print(inspect(self.members))
     end
     return true
@@ -285,6 +298,17 @@ function webqq.get_friend_info(self, id)
         return nil
     else
         return resp['result']
+    end
+end
+
+function webqq.get_user_account(self, uin)
+    local resp = json:decode(http.get('http://s.web2.qq.com/api/get_friend_uin2?tuin='
+        .. uin .. '&verifysession=&type=1&code=&vfwebqq=' .. self.vfwebqq .. '&t=' .. tostring(os.time() * 1000),
+        'http://s.web2.qq.com/proxy.html?v=20110412001&callback=1&id=3'))
+    if not resp or resp['retcode'] ~= 0 then
+        return nil
+    else
+        return resp['result']['account']
     end
 end
 

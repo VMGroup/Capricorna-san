@@ -1,4 +1,5 @@
 inspect = inspect or require('./libs/inspect')
+require 'saver'
 
 ai = { handlers = {} }
 -- AI的核心就是这里辣
@@ -54,16 +55,11 @@ end
 
 -- 加载AI存储的数据
 function ai.init_storage(self)
-    local f = io.open('./ai_storage.txt', 'a')
-    f:close()
-    self.storage = dofile('./ai_storage.txt')
+    self.storage = saver.load('./ai_storage.txt')
 end
 -- 把AI存储的数据写入到文件
 function ai.save_storage(self)
-    local f = io.open('./ai_storage.txt', 'w')
-    f:write('return ')
-    f:write(inspect(self.storage))
-    f:close()
+    saver.save('./ai_storage.txt', self.storage)
 end
 
 function ai.handle(self, uin, message)

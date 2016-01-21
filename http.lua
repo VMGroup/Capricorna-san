@@ -4,7 +4,7 @@ local inspect = require('./libs/inspect')
 
 function http.get(url, referer)
     referer = referer or 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'
-    print('[GET]  ' .. url)
+    --print('[GET]  ' .. url)
     local handle = io.popen('curl -q -k -s -b ' .. http.cookie_jar .. ' -c ' .. http.cookie_jar .. ' -X GET '
         .. '-e "' .. referer .. '" '
         .. '-m 10 "' .. url .. '"', 'r')
@@ -15,8 +15,8 @@ end
 
 function http.post(url, content, referer)
     referer = referer or 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'
-    print('[POST] ' .. url)
-    print(inspect(content))
+    --print('[POST] ' .. url)
+    --print(inspect(content))
     local handle = io.popen('curl -q -k -s -b ' .. http.cookie_jar .. ' -c ' .. http.cookie_jar .. ' -X POST '
         .. '-e "' .. referer .. '" '
         .. '-H "Content-Type: application/x-www-form-urlencoded" '
