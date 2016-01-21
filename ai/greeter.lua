@@ -47,7 +47,7 @@ ai.register_handler('greeter',
     end,
 
     function (self, uid, message, storage)
-        if ai.date.time_id >= 2230 then
+        if ai.date.time_id >= 2230 or ai.date.time_id < 0100 then
             self.send_message(string.format(ai.rand_from(oyasumi_msg), self.member_info[uin]['card']))
         elseif ai.date.time_id >= 1830 then
             storage.last_konbanwa = ai.date.day_id
