@@ -40,7 +40,7 @@ ai.register_handler('greeter',
         elseif ai.date.time_id >= 1830 and ai.date.time_id < 2230
             and storage.last_konbanwa ~= ai.date.day_id and (nyanpasu or message:find('晚好') or message:find('空帮')) -- 汪
         then return 1
-        elseif ai.date.time_id >= 2230  -- and ai.date.time_id < 2400
+        elseif ai.date.time_id >= 2230 or ai.date.time_id < 0100
             and (message:find('晚安') or message:find('yasumi'))
         then return 1
         else return 0 end
