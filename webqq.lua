@@ -244,13 +244,18 @@ function webqq.check_message(self)
         {r = '{"ptwebqq":"' .. self.ptwebqq .. '","clientid":' .. tostring(self.clientid)
             .. ',"psessionid":"' .. self.psessionid .. '","key":""}'},
         'http://d1.web2.qq.com/proxy.html?v=20030916001&callback=1&id=2')
+    -- 防止服务器发抽
+    --   <html><body><h1>502 Bad Gateway</h1>
+    --   The server returned an invalid or incomplete response.
+    --   </body></html>
+    if string.find(resp_text, '<html>', 1, true) then print('Oops :('); return end
     local resp_obj = json:decode(resp_text)
     if resp_obj ~= nil then
         local ret_code = resp_obj['retcode']
         if ret_code == 0 then
             local messages = resp_obj['result'], i, j, t, content
             if messages ~= nil and #messages > 0 then
-                print(inspect(messages))
+                --print(inspect(messages))
                 for i = 1, #messages do
                     if messages[i]['poll_type'] == 'group_message'
                         and messages[i]['value']['group_code'] == self.group_gid
@@ -262,7 +267,7 @@ function webqq.check_message(self)
                         -- TODO: 自动回复好友信息 = =
                         -- TODO: 还要自动回复临时会话 = =
                         t = messages[i]['value']
-                        print(inspect(t))
+                        --print(inspect(t))
                     end
                 end
             end
