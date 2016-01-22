@@ -337,7 +337,7 @@ function webqq.handle_message(self, send_time, account, messages)
         end
     end
     print(send_time, os.time(), account, concat)
-    self.ai:handle(account, concat)
+    if account ~= nil then self.ai:handle(account, concat) end
 end
 
 function webqq.check_time(self)
