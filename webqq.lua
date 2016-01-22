@@ -178,7 +178,6 @@ function webqq.find_group(self)
         end
     end
     if idx == -1 then print('Group "' .. self.group_name .. '"not found. Exiting'); return false end
-    print(inspect(list[idx]))
     self.group_gid = list[idx]['gid']
     
     print('Retrieving group info...')
@@ -189,7 +188,6 @@ function webqq.find_group(self)
     if resp_obj2['retcode'] ~= 0 then
         print('[WARN] Cannot retrieve member list :( Some functionalities may not work')
     else
-        --print(inspect(resp_obj2['result']))
         local cards = {}
         local card_list = resp_obj2['result']['cards']
         local member_list = resp_obj2['result']['minfo']
@@ -218,7 +216,6 @@ function webqq.find_group(self)
         end
         account_map.psessionid = self.psessionid
         saver.save('webqq_cache.txt', account_map)
-        print(inspect(self.members))
     end
     self.account_with_uin = account_map
     return true
@@ -262,7 +259,7 @@ function webqq.check_message(self)
                     then
                         t = messages[i]['value']
                         -- 取得发送者的信息（主要是QQ号和昵称）
-                        self:handle_message(self.account_with_uin[t['send_uin']], t['content'])
+                        self:handle_message(t['time'], self.account_with_uin[t['send_uin']], t['content'])
                     elseif messages[i]['poll_type'] == 'message' then
                         -- TODO: 自动回复好友信息 = =
                         -- TODO: 还要自动回复临时会话 = =
@@ -329,7 +326,7 @@ function webqq.init_ai(self)
     self.ai = ai:create(self.full_info, self.members, function (m) self:send_message(m) end)
 end
 
-function webqq.handle_message(self, account, messages)
+function webqq.handle_message(self, send_time, account, messages)
     local i
     local concat = ''
     for i = 1, #messages do
@@ -337,7 +334,7 @@ function webqq.handle_message(self, account, messages)
             concat = concat .. messages[i]
         end
     end
-    print(account, concat)
+    print(send_time, os.time(), account, concat)
     self.ai:handle(account, concat)
 end
 
