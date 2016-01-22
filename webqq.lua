@@ -60,11 +60,13 @@ function webqq.retrieve_qrcode(self)
         local start_time = os.time()
         -- 下载二维码
         http.download('https://ssl.ptlogin2.qq.com/ptqrshow?appid=' .. appid
-            .. '&e=0&l=L&s=8&d=72&v=4&t=' .. tostring(math.random()), 'login.jpg',
+            .. '&e=0&l=L&s=8&d=72&v=4&t=' .. tostring(math.random()), 'login.png',
             'https://ui.ptlogin2.qq.com/cgi-bin/login?daid=164&target=self&style=16&mibao_css=m_webqq&appid=501004106&enable_qlogin=0&no_verifyimg=1&s_url=http%3A%2F%2Fw.qq.com%2Fproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20131024001')
         -- TODO: 增加其他系统的支持 (http://stackoverflow.com/questions/264395/)
-        print('Scan the QR code (login.jpg) with QQ for Mobile to finish the log-in process')
-        --os.execute('open login.jpg')
+        print('Scan the QR code (login.png) with QQ for Mobile to finish the log-in process')
+        -- TODO: 根据操作系统确定打开方式
+        -- https://github.com/keplerproject/luarocks/blob/master/src/luarocks/cfg.lua#L79
+        --os.execute('open login.png')  -- OS X 下使用
 
         -- 66: 未失效；67: 验证中；65: 失效；0: 验证完成
         local status = 66, status_text
