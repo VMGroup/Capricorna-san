@@ -54,6 +54,7 @@ function ai.create(self, self_info, members_info, ticket)
 
     ret.init_storage = self.init_storage
     ret.save_storage = self.save_storage
+    ret.update_member_list = self.update_member_list
     ret.handle = self.handle
     ret.check_time = self.check_time
 
@@ -81,6 +82,10 @@ end
 -- 需要手动调用。。。（这个设计模式似乎略乱诶QAQ）
 function ai.save_storage(self)
     saver.save('./ai_storage.txt', self.storage)
+end
+
+function ai.update_member_list(self, new_list)
+    self.member_info = new_list
 end
 
 function ai.handle(self, uin, message)

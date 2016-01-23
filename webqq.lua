@@ -183,7 +183,7 @@ function webqq.find_group(self)
     self.group_gid = list[idx]['gid']
     
     print('Retrieving group info...')
-    local account_map = saver.load('webqq_cache.txt') or { psessionid = '' }
+    local account_map = saver.load('webqq_cache.txt') or {}
     -- 取得成员列表！
     local resp_obj2 = json:decode(http.post('http://s.web2.qq.com/api/get_group_info_ext2',
         {gcode = list[idx]['code'], vfwebqq = self.vfwebqq, t = os.time() * 1000 }))
@@ -202,7 +202,7 @@ function webqq.find_group(self)
             if cards[t] == nil then
                 cards[t] = member_list[i]['nick']
             end
-            if account_map.psessionid ~= self.psessionid then
+            if account_map[t] == nil then
                 -- 取得用户QQ帐号
                 p = self:get_user_account(t)
                 print(string.format('%d / %d', i, #member_list))
@@ -216,7 +216,6 @@ function webqq.find_group(self)
         for i, t in pairs(cards) do
             self.members[account_map[i]]['card'] = t
         end
-        account_map.psessionid = self.psessionid
         saver.save('webqq_cache.txt', account_map)
     end
     self.account_with_uin = account_map
@@ -261,7 +260,7 @@ function webqq.check_message(self)
                     then
                         t = messages[i]['value']
                         -- 取得发送者的信息（主要是QQ号和昵称）
-                        self:handle_message(t['time'], self.account_with_uin[t['send_uin']], t['content'])
+                        self:handle_message(t['time'], self.account_with_uin[t['send_uin']], t['content'], t)
                     elseif messages[i]['poll_type'] == 'message' then
                         -- TODO: 自动回复好友信息 = =
                         -- TODO: 还要自动回复临时会话 = =
@@ -328,7 +327,7 @@ function webqq.init_ai(self)
     self.ai = ai:create(self.full_info, self.members, function (m) self:send_message(m) end)
 end
 
-function webqq.handle_message(self, send_time, account, messages)
+function webqq.handle_message(self, send_time, account, messages, full_data)
     local i
     local concat = ''
     for i = 1, #messages do
@@ -337,7 +336,24 @@ function webqq.handle_message(self, send_time, account, messages)
         end
     end
     print(send_time, os.time(), account, concat)
-    if account ~= nil then self.ai:handle(account, concat) end
+    --self.members[1786762946] = nil
+    if account and self.members[account] ~= nil then
+        self.ai:handle(account, concat)
+    else
+        -- 似乎有新人？（或者是系统消息之类的。。）
+        local i
+        local old_members = {}
+        for i, _ in pairs(self.members) do old_members[i] = true end
+        print('Updating members list')
+        while not self:find_group() do print('Cannot retrieve group data T^T Retrying') end
+        for i, _ in pairs(self.members) do
+            if not old_members[i] then self.members[i].is_newcomer = true end
+        end
+        self.ai:update_member_list(self.members)
+        -- 额如果是系统消息就不管了 -, -
+        account = self.account_with_uin[full_data['send_uin']]
+        if account ~= nil then self.ai:handle(account, concat) end
+    end
 end
 
 function webqq.check_time(self)
