@@ -41,6 +41,7 @@ ai.update_time()
 require 'ai/greeter'
 require 'ai/dot_counter'
 
+require 'ai/welcomer'
 require 'ai/wakeup'
 
 -- self_info:    机器人帐号的资料，一个 table

@@ -13,8 +13,11 @@ ai.register_handler('greeter',
 
 local ohayo_msg = {
     '%s 早上好',
-    'おはよう～',
-    'にゃんぱすー'
+    'おはようございます～',   -- 日语
+    'Bon matin',    -- 法语
+    'Guten Morgen', -- 德语
+    'Selamat pagi', -- 马来语
+    'にゃんぱすー', '喵帕斯～'
 }
 local konbanwa_msg = {
     '%s 晚上好',
@@ -23,8 +26,16 @@ local konbanwa_msg = {
 }
 local oyasumi_msg = {
     '%s 晚安～',
-    'Oyasuminasai',
-    'おやすみなさい'
+    'Oyasuminasai', -- 日语罗马音
+    'Bonne nuit',   -- 法语
+    'Gute Nacht',   -- 德语
+    '¡Buenas noches!',  -- 西班牙语
+    'Selamat malam',    -- 马来语
+    'Спокойной ночи',   -- 俄语
+    'Habeen wanaagsan', -- 索马里语
+    'Sugeng dalu!', -- 爪哇/Java语（雾
+    'Tafandria mandry!',    -- 马尔加什语
+    'ゆめで すぐ あえるね おやすみなさい'   -- Zzz
 }
 ai.register_handler('greeter',
     function (self, storage)
