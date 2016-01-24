@@ -284,10 +284,10 @@ end
 function webqq.send_message(self, text)
     local req_body = '{"group_uin":' .. self.group_gid .. ',"content":"['
     if type(text) == 'string' then
-        req_body = req_body .. '\\"' .. text .. '\\",'
+        req_body = req_body .. '\\"' .. text:gsub('\n', '\\n') .. '\\",'
     else
         for i = 1, #text do
-            req_body = req_body .. '\\"' .. text[i] .. '\\",'
+            req_body = req_body .. '\\"' .. text[i]:gsub('\n', '\\n') .. '\\",'
         end
     end
     req_body = req_body
