@@ -118,7 +118,7 @@ ai.register_handler('weather',
 local sunrise_sunset_report = function (d)
     return d.orig_name .. '[' .. d.name .. '] ' .. os.date('%Y-%m-%d') .. '\n'
         .. '日出时间：' .. os.date('%H:%M', d.sys.sunrise) .. '；日落时间：' .. os.date('%H:%M', d.sys.sunset)
-        .. '数据来源：OpenWeatherMap'
+        .. '\n数据来源：OpenWeatherMap'
 end
 ai.register_handler('weather',
     function () end,
