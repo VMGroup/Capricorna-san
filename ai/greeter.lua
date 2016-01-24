@@ -11,6 +11,24 @@ ai.register_handler('greeter',
     end
 )
 
+local bubble_breaker = {
+    '戳',
+    '戳（≧∇≦）',
+    '这个给我戳泥们都别抢 ><'
+}
+ai.register_handler('greeter',
+    function () end,
+
+    function (self, uin, message)
+        if math.random() < 0.3 and (message == '冒' or message == '冒泡') then return 1
+        else return 0 end
+    end,
+
+    function (self, uin, message)
+        self.send_message(ai.rand_from(bubble_breaker))
+    end
+)
+
 local ohayo_msg = {
     '%s 早上好',
     'おはようございます～',   -- 日语
@@ -48,7 +66,7 @@ ai.register_handler('greeter',
         if ai.date.time_id >= 063000 and ai.date.time_id < 090000
             and storage.last_ohayo ~= ai.date.day_id and (nyanpasu or message:find('早') or message:find('ohayo'))
         then return 1
-        elseif ai.date.time_id >= 183000 and ai.date.time_id < 223000
+        elseif ai.date.time_id >= 173000 and ai.date.time_id < 223000
             and storage.last_konbanwa ~= ai.date.day_id and (nyanpasu or message:find('晚好') or message:find('空帮')) -- 汪
         then return 1
         elseif (ai.date.time_id >= 223000 or ai.date.time_id < 010000)
@@ -60,7 +78,7 @@ ai.register_handler('greeter',
     function (self, uid, message, storage)
         if ai.date.time_id >= 223000 or ai.date.time_id < 010000 then
             self.send_message(string.format(ai.rand_from(oyasumi_msg), self.member_info[uid]['card']))
-        elseif ai.date.time_id >= 183000 then
+        elseif ai.date.time_id >= 173000 then
             storage.last_konbanwa = ai.date.day_id
             self.send_message(string.format(ai.rand_from(konbanwa_msg), self.member_info[uid]['card']))
         else
