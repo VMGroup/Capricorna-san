@@ -59,10 +59,21 @@ local dir_desc = function (deg)
 end
 local weather_report = function (d)
     return d.orig_name .. '[' .. d.name .. '] 天气（' .. os.date('%Y-%m-%d %H:%M', d.dt) .. ' 更新）：\n'
-        .. (weather_desc[d.weather[1].id] or d.weather[1].description) .. '\n'
-        .. '温度：' .. d.main.temp .. '℃（' .. d.main.temp_min .. '℃ ~ ' .. d.main.temp_max .. '℃）；\n'
+        .. (weather_desc[d.weather[1].id] or d.weather[1].description) .. ' 温度：' .. d.main.temp .. '℃；\n'
         .. '气压：' .. d.main.pressure .. ' hPa；相对湿度：' .. d.main.humidity .. '%；\n'
         .. '风力：' .. d.wind.speed .. '级；风向：' .. dir_desc(d.wind.deg) .. '（' .. d.wind.deg .. '°）\n'
+end
+local weather_forecast = function (d)
+    local s = d.orig_name .. '[' .. d.city.name .. '] 天气预报：\n'
+    local i, last_disp, cur = 0, 0, nil
+    for i = 1, #d.list do if d.list[i].dt >= last_disp + 86400 then
+        cur = d.list[i]
+        last_disp = cur.dt
+        s = s .. os.date('%Y-%m-%d', last_disp) .. '：'
+            .. (weather_desc[cur.weather[1].id] or cur.weather[1].description) .. ' '
+            .. cur.main.temp_min .. '℃ ~ ' .. cur.main.temp_max .. '℃\n'
+    end end
+    return s
 end
 ai.register_handler('weather',
     function () end,
@@ -74,16 +85,26 @@ ai.register_handler('weather',
 
     function (self, uin, message)
         local i
+        local is_forecast = (message:find('预报') ~= nil or message:find('未来') ~= nil)
         for i = 1, #cities do
             if message:find(cities[i][1]) then
-                resp = json:decode(http.get(
-                    'http://api.openweathermap.org/data/2.5/weather?id=' .. cities[i][2] .. '&units=metric&appid=' .. api_key))
-                if resp.cod ~= 200 then
+                if is_forecast then
+                    resp = json:decode(http.get(
+                        'http://api.openweathermap.org/data/2.5/forecast?id=' .. cities[i][2] .. '&units=metric&appid=' .. api_key))
+                else
+                    resp = json:decode(http.get(
+                        'http://api.openweathermap.org/data/2.5/weather?id=' .. cities[i][2] .. '&units=metric&appid=' .. api_key))
+                end
+                if tonumber(resp.cod) ~= 200 then
                     print(inspect(resp))
                     self.send_message('无法取得' .. cities[i][1] .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
                 else
                     resp.orig_name = cities[i][1]
-                    self.send_message(weather_report(resp))
+                    if is_forecast then
+                        self.send_message(weather_forecast(resp))
+                    else
+                        self.send_message(weather_report(resp))
+                    end
                 end
                 return
             end
