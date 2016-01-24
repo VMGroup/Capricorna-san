@@ -9,7 +9,8 @@ local cities = {
     {'拉萨', 1280737},
     {'郑州', 1784658},
     {'仙居', 1790413},
-    {'上海', 1796236}
+    {'上海', 1796236},
+    {'攀枝花', 6929460}
 }
 
 -- http://openweathermap.org/weather-conditions
@@ -63,7 +64,6 @@ local weather_report = function (d)
         .. '气压：' .. d.main.pressure .. ' hPa；相对湿度：' .. d.main.humidity .. '%；\n'
         .. '风力：' .. d.wind.speed .. '级；风向：' .. dir_desc(d.wind.deg) .. '（' .. d.wind.deg .. '°）\n'
 end
-
 ai.register_handler('weather',
     function () end,
 
@@ -89,5 +89,37 @@ ai.register_handler('weather',
             end
         end
         self.send_message('并不知道泥在说哪个城市啊。。试下“北京天气”这样的说法')
+    end
+)
+
+local sunrise_sunset_report = function (d)
+    return d.orig_name .. '[' .. d.name .. '] ' .. os.date('%Y-%m-%d') .. '\n'
+        .. '日出时间：' .. os.date('%H:%M', d.sys.sunrise) .. '；日落时间：' .. os.date('%H:%M', d.sys.sunset)
+end
+ai.register_handler('weather',
+    function () end,
+
+    function (self, uin, message)
+        if message:find('日出') ~= nil or message:find('日落') ~= nil then return 1
+        else return 0 end
+    end,
+
+    function (self, uin, message)
+        local i
+        for i = 1, #cities do
+            if message:find(cities[i][1]) then
+                resp = json:decode(http.get(
+                    'http://api.openweathermap.org/data/2.5/weather?id=' .. cities[i][2] .. '&units=metric&appid=' .. api_key))
+                if resp.cod ~= 200 then
+                    print(inspect(resp))
+                    self.send_message('无法取得' .. cities[i][1] .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
+                else
+                    resp.orig_name = cities[i][1]
+                    self.send_message(sunrise_sunset_report(resp))
+                end
+                return
+            end
+        end
+        self.send_message('并不知道泥在说哪个城市啊。。试下“北京日出日落”这样的说法')
     end
 )
