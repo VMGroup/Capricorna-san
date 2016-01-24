@@ -73,7 +73,7 @@ local weather_forecast = function (d)
         last_disp = cur.dt
         s = s .. os.date('%Y-%m-%d', last_disp) .. '：'
             .. (weather_desc[cur.weather[1].id] or cur.weather[1].description) .. ' '
-            .. cur.main.temp_min .. '℃ ~ ' .. cur.main.temp_max .. '℃ 风力' .. cur.wind.speed .. '级\n'
+            .. math.floor(cur.main.temp_min) .. '℃ ~ ' .. math.floor(cur.main.temp_max) .. '℃ 风力' .. cur.wind.speed .. '级\n'
     end end
     return s .. '数据来源：OpenWeatherMap'
 end
