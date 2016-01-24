@@ -10,7 +10,8 @@ local cities = {
     {'郑州', 1784658},
     {'仙居', 1790413},
     {'上海', 1796236},
-    {'攀枝花', 6929460}
+    {'攀枝花', 6929460},
+    {'绵阳', 1800627}
 }
 
 -- http://openweathermap.org/weather-conditions
@@ -62,6 +63,7 @@ local weather_report = function (d)
         .. (weather_desc[d.weather[1].id] or d.weather[1].description) .. ' 温度：' .. d.main.temp .. '℃；\n'
         .. '气压：' .. d.main.pressure .. ' hPa；相对湿度：' .. d.main.humidity .. '%；\n'
         .. '风力：' .. d.wind.speed .. '级；风向：' .. dir_desc(d.wind.deg) .. '（' .. d.wind.deg .. '°）\n'
+        .. '数据来源：OpenWeatherMap'
 end
 local weather_forecast = function (d)
     local s = d.orig_name .. '[' .. d.city.name .. '] 天气预报：\n'
@@ -71,9 +73,9 @@ local weather_forecast = function (d)
         last_disp = cur.dt
         s = s .. os.date('%Y-%m-%d', last_disp) .. '：'
             .. (weather_desc[cur.weather[1].id] or cur.weather[1].description) .. ' '
-            .. cur.main.temp_min .. '℃ ~ ' .. cur.main.temp_max .. '℃\n'
+            .. cur.main.temp_min .. '℃ ~ ' .. cur.main.temp_max .. '℃ 风力' .. cur.wind.speed .. '级\n'
     end end
-    return s
+    return s .. '数据来源：OpenWeatherMap'
 end
 ai.register_handler('weather',
     function () end,
@@ -116,6 +118,7 @@ ai.register_handler('weather',
 local sunrise_sunset_report = function (d)
     return d.orig_name .. '[' .. d.name .. '] ' .. os.date('%Y-%m-%d') .. '\n'
         .. '日出时间：' .. os.date('%H:%M', d.sys.sunrise) .. '；日落时间：' .. os.date('%H:%M', d.sys.sunset)
+        .. '数据来源：OpenWeatherMap'
 end
 ai.register_handler('weather',
     function () end,
