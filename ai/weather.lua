@@ -2,17 +2,8 @@ json = json or require('./libs/json')
 require './http'
 
 --local api_key = 'f6a3c950db757b5268a621dfc2ad4e7c'
---local api_key = '21b1550dccd8e2b660b7bed89deb2fd1'
-local api_key = '44db6a862fba0b067b1930da0d769e98'
--- Extracted from http://bulk.openweathermap.org/sample/city.list.json.gz
-local cities = {
-    {'拉萨', 1280737},
-    {'郑州', 1784658},
-    {'仙居', 1790413},
-    {'上海', 1796236},
-    {'攀枝花', 6929460},
-    {'绵阳', 1800627}
-}
+local api_key = '21b1550dccd8e2b660b7bed89deb2fd1'
+--local api_key = '44db6a862fba0b067b1930da0d769e98'
 
 -- http://openweathermap.org/weather-conditions
 local weather_desc = {
@@ -77,6 +68,12 @@ local weather_forecast = function (d)
     end end
     return s .. '数据来源：OpenWeatherMap'
 end
+local chn_trim = function (s)
+    if s:sub(-3) == '的' then s = s:sub(1, -4) end
+    if s:sub(-6) == '今天' or s:sub(-6) == '明天' or s:sub(-6) == '后天'
+        or s:sub(-6) == '下周' or s:sub(-6) == '一周' then s = s:sub(1, -7) end
+    return s
+end
 ai.register_handler('weather',
     function () end,
 
@@ -86,32 +83,32 @@ ai.register_handler('weather',
     end,
 
     function (self, uin, message)
-        local i
-        local is_forecast = (message:find('预报') ~= nil or message:find('未来') ~= nil)
-        for i = 1, #cities do
-            if message:find(cities[i][1]) then
-                if is_forecast then
-                    resp = json:decode(http.get(
-                        'http://api.openweathermap.org/data/2.5/forecast?id=' .. cities[i][2] .. '&units=metric&appid=' .. api_key))
-                else
-                    resp = json:decode(http.get(
-                        'http://api.openweathermap.org/data/2.5/weather?id=' .. cities[i][2] .. '&units=metric&appid=' .. api_key))
-                end
-                if tonumber(resp.cod) ~= 200 then
-                    print(inspect(resp))
-                    self.send_message('无法取得' .. cities[i][1] .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
-                else
-                    resp.orig_name = cities[i][1]
-                    if is_forecast then
-                        self.send_message(weather_forecast(resp))
-                    else
-                        self.send_message(weather_report(resp))
-                    end
-                end
-                return
+        local i, resp
+        local city_name = chn_trim(message:sub(1, message:find('天气') - 1))
+        local is_forecast = ((message:find('预报') or message:find('未来') or message:find('明天')
+            or message:find('后天') or message:find('下周') or message:find('一周')) ~= nil)
+        while resp == nil do
+            print('Retrieving weather data...')
+            if is_forecast then
+                resp = json:decode(http.get(
+                    'http://api.openweathermap.org/data/2.5/forecast?q=' .. city_name .. '&units=metric&appid=' .. api_key))
+            else
+                resp = json:decode(http.get(
+                    'http://api.openweathermap.org/data/2.5/weather?q=' .. city_name .. '&units=metric&appid=' .. api_key))
             end
         end
-        self.send_message('并不知道泥在说哪个城市啊。。试下“北京天气”这样的说法')
+        if tonumber(resp.cod) == 200 then
+            resp.orig_name = city_name
+            if is_forecast then
+                self.send_message(weather_forecast(resp))
+            else
+                self.send_message(weather_report(resp))
+            end
+        elseif tonumber(resp.cod) == 404 then
+            self.send_message('并不知道泥在说哪个城市啊。。试下“北京天气”这样的说法')
+        else
+            self.send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
+        end
     end
 )
 
@@ -129,21 +126,20 @@ ai.register_handler('weather',
     end,
 
     function (self, uin, message)
-        local i
-        for i = 1, #cities do
-            if message:find(cities[i][1]) then
-                resp = json:decode(http.get(
-                    'http://api.openweathermap.org/data/2.5/weather?id=' .. cities[i][2] .. '&units=metric&appid=' .. api_key))
-                if resp.cod ~= 200 then
-                    print(inspect(resp))
-                    self.send_message('无法取得' .. cities[i][1] .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
-                else
-                    resp.orig_name = cities[i][1]
-                    self.send_message(sunrise_sunset_report(resp))
-                end
-                return
-            end
+        local i, resp
+        local city_name = chn_trim(message:sub(1, (message:find('日出') or message:find('日落')) - 1))
+        while resp == nil do
+            print('Retrieving weather data...')
+            resp = json:decode(http.get(
+                'http://api.openweathermap.org/data/2.5/weather?q=' .. city_name .. '&units=metric&appid=' .. api_key))
         end
-        self.send_message('并不知道泥在说哪个城市啊。。试下“北京日出日落”这样的说法')
+        if tonumber(resp.cod) == 200 then
+            resp.orig_name = city_name
+            self.send_message(sunrise_sunset_report(resp))
+        elseif tonumber(resp.cod) == 404 then
+            self.send_message('并不知道泥在说哪个城市啊。。试下“北京日出日落”这样的说法')
+        else
+            self.send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
+        end
     end
 )
