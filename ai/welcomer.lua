@@ -13,7 +13,7 @@ local welcome_msg = {
     }, [4] = {
         '有任何疑问的话。。我都不能解答。。= = 但是可以隔几分钟人工置顶哦。。只要在开头加“置顶”就好'
     }, [5] = {
-        '（不不不偷懒上述功能全部没有加ˊ_>ˋ）'
+        '（不不不coder菌偷懒啦上述功能几乎全部没有加ˊ_>ˋ）'
     }, [6] = {
         '哦对了，本群成文规定：新人都是触～祝愉快ww'
     }
@@ -41,12 +41,17 @@ ai.register_timer('welcomer',
 )
 
 local downloads = {
+    -- 正经的内容
+    { name = 'v[34]', full_name = 'Vocaloid 3/4 安装包+中文音源（洛天依&言和&乐正绫&心华）', link = 'http://pan.baidu.com/s/1o6wzmBo 密码：rih3' },
+    { name = '音源', full_name = 'Vocaloid 3/4 所有音源（所有语种）', link = 'http://pan.baidu.com/s/1jGvl3j4 密码：yzy5' },
     { name = 'fl.+破解', full_name = 'FL Studio 12 注册机', link = 'http://pan.baidu.com/s/1borvNLd 密码：kryu' },
     { name = 'fl.+注册', full_name = 'FL Studio 12 注册机', link = 'http://pan.baidu.com/s/1borvNLd 密码：kryu' },
     { name = 'fl', full_name = 'FL Studio 12', link = 'http://pan.baidu.com/s/1hqT5dmW 密码：e7nj' },
-    { name = 'osu', full_name = 'osu! 安装包', link = 'http://pan.baidu.com/s/1mgriaEW 密码：ya7j' },
     { name = 'audacity', full_name = 'Audacity 2.1.1 for Windows', link = 'http://pan.baidu.com/s/1hqlhGzy 密码：4xtu' },
+    -- 有点不正经的内容
     { name = '入戏太深', full_name = '马旭东《入戏太深》 Vocaloid全套资源', link = 'http://pan.baidu.com/s/1pJiOfUj' },
+    -- 非常不正经的内容
+    { name = 'osu', full_name = 'osu! 安装包', link = 'http://pan.baidu.com/s/1mgriaEW 密码：ya7j' },
     { name = 'lantern', full_name = 'Lantern（墙内）下载页面', link = 'https://github.com/getlantern/lantern/releases' }
 }
 local downloads_msg = {
@@ -70,5 +75,6 @@ ai.register_handler('welcomer',
                 return
             end
         end
+        self.send_message('。。并没有找到泥要的资源哦。。去群资源页 http://vocaloid.yesterday17.cn/resources.html 逛逛？')
     end
 )
