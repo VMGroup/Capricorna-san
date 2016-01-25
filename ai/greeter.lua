@@ -30,12 +30,15 @@ ai.register_handler('greeter',
 )
 
 local ohayo_msg = {
-    '%s 早上好',
+    '%s 早',
+    '%s 早上好呀',
+    '早早早 \\(≧∇≦)/',
     'おはようございます～',   -- 日语
     'Bon matin',    -- 法语
     'Guten Morgen', -- 德语
+    '¡Buenos dias!',    -- 西班牙语
     'Selamat pagi', -- 马来语
-    'にゃんぱすー', '喵帕斯～'
+    'にゃんぱすー', '%s 喵帕斯～'
 }
 local konbanwa_msg = {
     '%s 晚上好',
@@ -57,14 +60,13 @@ local oyasumi_msg = {
 }
 ai.register_handler('greeter',
     function (self, storage)
-        storage.last_ohayo = storage.last_ohayo or 0
         storage.last_konbanwa = storage.last_konbanwa or 0
     end,
 
     function (self, uid, message, storage)
         local nyanpasu = message:find('にゃんぱす') or message:find('喵帕斯')
         if ai.date.time_id >= 063000 and ai.date.time_id < 090000
-            and storage.last_ohayo ~= ai.date.day_id and (nyanpasu or message:find('早') or message:find('ohayo'))
+            and (nyanpasu or message:find('早') or message:find('ohayo'))
         then return 1
         elseif ai.date.time_id >= 173000 and ai.date.time_id < 223000
             and storage.last_konbanwa ~= ai.date.day_id and (nyanpasu or message:find('晚好') or message:find('空帮')) -- 汪
@@ -82,7 +84,6 @@ ai.register_handler('greeter',
             storage.last_konbanwa = ai.date.day_id
             self.send_message(string.format(ai.rand_from(konbanwa_msg), self.member_info[uid]['card']))
         else
-            storage.last_ohayo = ai.date.day_id
             self.send_message(string.format(ai.rand_from(ohayo_msg), self.member_info[uid]['card']))
         end
     end
