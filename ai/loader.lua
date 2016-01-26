@@ -38,6 +38,7 @@ function ai.update_time()
 end
 ai.update_time()
 
+require 'ai/shutter'
 require 'ai/greeter'
 require 'ai/dot_counter'
 require 'ai/weather'
