@@ -41,6 +41,7 @@ ai.update_time()
 require 'ai/greeter'
 require 'ai/dot_counter'
 require 'ai/weather'
+require 'ai/wiki'
 
 require 'ai/welcomer'
 require 'ai/wakeup'
