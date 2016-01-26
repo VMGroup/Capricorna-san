@@ -1,4 +1,4 @@
-json = json or require('./libs/json')
+json = json or require('./libs/JSON')
 require './http'
 
 --local api_key = 'f6a3c950db757b5268a621dfc2ad4e7c'
@@ -50,11 +50,15 @@ local dir_desc = function (deg)
     return dirs[math.floor(math.fmod(deg + 11.25, 360) / (360 / 16)) + 1]
 end
 local weather_report = function (d)
-    return d.orig_name .. '[' .. d.name .. '] 天气（' .. os.date('%Y-%m-%d %H:%M', d.dt) .. ' 更新）：\n'
+    local s = d.orig_name .. '[' .. d.name .. '] 天气（' .. os.date('%Y-%m-%d %H:%M', d.dt) .. ' 更新）：\n'
         .. (weather_desc[d.weather[1].id] or d.weather[1].description) .. ' 温度：' .. d.main.temp .. '℃；\n'
         .. '气压：' .. d.main.pressure .. ' hPa；相对湿度：' .. d.main.humidity .. '%；\n'
-        .. '风力：' .. d.wind.speed .. '级；风向：' .. dir_desc(d.wind.deg) .. '（' .. d.wind.deg .. '°）\n'
-        .. '数据来源：OpenWeatherMap'
+        .. '风力：' .. d.wind.speed .. '级'
+    if d.wind.deg then
+        s = s .. '；风向：' .. dir_desc(d.wind.deg) .. '（' .. d.wind.deg .. '°）'
+    end
+    s = s .. '\n数据来源：OpenWeatherMap'
+    return s
 end
 local weather_forecast = function (d)
     local s = d.orig_name .. '[' .. d.city.name .. '] 天气预报：\n'
