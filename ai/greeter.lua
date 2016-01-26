@@ -20,7 +20,7 @@ ai.register_handler('greeter',
     function () end,
 
     function (self, uin, message)
-        if math.random() < 0.3 and (message == '冒' or message == '冒泡') then return 1
+        if math.random() < 0.5 and (message == '冒' or message == '冒泡') then return 1
         else return 0 end
     end,
 
