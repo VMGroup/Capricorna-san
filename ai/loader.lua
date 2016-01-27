@@ -38,12 +38,17 @@ function ai.update_time()
 end
 ai.update_time()
 
+-- Pure triggers
 require 'ai/shutter'
-require 'ai/greeter'
 require 'ai/dot_counter'
 require 'ai/weather'
 require 'ai/wiki'
 
+-- Hybrid
+require 'ai/greeter'
+require 'ai/advertise'
+
+-- Pure timers
 require 'ai/welcomer'
 require 'ai/wakeup'
 
