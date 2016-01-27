@@ -25,7 +25,7 @@ ai.register_handler('wiki',
         if page.missing then
             self.send_message(ai.rand_from(not_found_msg))
         else
-            self.send_message('[' .. page.title .. ']\n' .. page.extract)
+            self.send_message('[' .. page.title .. ']\n' .. page.extract:match('^%s*(.-)%s*$'))
         end
     end
 )
