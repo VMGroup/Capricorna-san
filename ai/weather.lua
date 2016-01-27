@@ -44,7 +44,8 @@ ai.register_handler('weather',
     function () end,
 
     function (self, uin, message)
-        if message:find('天气') ~= nil then return 1
+        local p = message:find('天气')
+        if p and p <= 24 then return 1
         else return 0 end
     end,
 
@@ -63,6 +64,7 @@ ai.register_handler('weather',
                     'http://api.openweathermap.org/data/2.5/weather?q=' .. city_name .. '&units=metric&lang=zh_cn&appid=' .. api_key))
             end
         end
+        if type(resp) ~= 'table' then return end
         if tonumber(resp.cod) == 200 then
             resp.orig_name = city_name
             if is_forecast then
@@ -87,7 +89,8 @@ ai.register_handler('weather',
     function () end,
 
     function (self, uin, message)
-        if message:find('日出') ~= nil or message:find('日落') ~= nil then return 1
+        local p = message:find('日出') or message:find('日落')
+        if p and p <= 24 then return 1
         else return 0 end
     end,
 
@@ -99,6 +102,7 @@ ai.register_handler('weather',
             resp = json:decode(http.get(
                 'http://api.openweathermap.org/data/2.5/weather?q=' .. city_name .. '&units=metric&lang=zh_cn&appid=' .. api_key))
         end
+        if type(resp) ~= 'table' then return end
         if tonumber(resp.cod) == 200 then
             resp.orig_name = city_name
             self.send_message(sunrise_sunset_report(resp))
