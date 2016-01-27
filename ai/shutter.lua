@@ -55,6 +55,7 @@ ai.register_handler('shutter',
                     self.send_message(ai.rand_from(cancel_msg))
                     storage.confirming = 0
                 end
+                return 0
             end
         elseif storage.is_shut then
             if string_list_match(message, revive_triggers) then
@@ -68,7 +69,10 @@ ai.register_handler('shutter',
                 self.send_message(ai.rand_from(ask_msg))
                 storage.confirming = 1
                 return 1
+            elseif message:find('阿绫') then
+                return 2
             end
+            return 0
         end
     end,
 
