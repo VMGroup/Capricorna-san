@@ -25,7 +25,19 @@ ai.register_handler('wiki',
         if page.missing then
             self.send_message(ai.rand_from(not_found_msg))
         else
-            self.send_message('[' .. page.title .. ']\n' .. page.extract:match('^%s*(.-)%s*$'))
+            local text = page.extract:match('^%s*(.-)%s*$')
+            if text:len() <= 256 then
+                self.send_message('[' .. page.title .. ']\n' .. text)
+            else
+                local chunks = math.ceil(text:len() / 256)
+                self.send_message('[' .. page.title .. '](1/' .. chunks .. ')\n'
+                    .. text:sub(1, 256))
+                for i = 2, chunks do
+                    zzz(2)
+                    self.send_message('[' .. page.title .. '](' .. i .. '/' .. chunks .. ')\n…'
+                        .. text:sub(i * 256 - 263, i * 256))
+                end
+            end
         end
     end
 )
