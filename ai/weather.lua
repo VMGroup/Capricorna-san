@@ -74,7 +74,7 @@ local weather_forecast = function (d)
 end
 local chn_trim = function (s)
     if s:sub(-3) == '的' then s = s:sub(1, -4) end
-    if s:sub(-6) == '今天' or s:sub(-6) == '明天' or s:sub(-6) == '后天'
+    if s:sub(-6) == '今天' or s:sub(-6) == '现在' or s:sub(-6) == '明天' or s:sub(-6) == '后天'
         or s:sub(-6) == '下周' or s:sub(-6) == '一周' then s = s:sub(1, -7) end
     return s
 end
