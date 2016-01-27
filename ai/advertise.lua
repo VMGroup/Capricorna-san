@@ -20,9 +20,9 @@ ai.register_handler('advertise',
 )
 
 ai.register_timer('advertise',
-    ai.times.hour * 1 - ai.times.minute * 2,
+    ai.times.hour * 2 - ai.times.minute * 2,
     function (self)
-        return ai.date.time_id % 10000 <= 200
+        return ai.date.time_id % 20000 <= 200
     end,
 
     function (self, storage)
