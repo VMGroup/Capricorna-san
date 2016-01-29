@@ -8,7 +8,7 @@ ai.register_handler('advertise',
     end,
 
     function (self, uid, message, storage)
-        if message == '取消安利' then
+        if message:find('取消.+安利') then
             storage[uid] = nil
             self.send_message('安利已经停下啦～')
         else
