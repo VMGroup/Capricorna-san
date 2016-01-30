@@ -171,7 +171,7 @@ function webqq.find_group(self)
     local resp_obj = json:decode(http.post('http://s.web2.qq.com/api/get_group_name_list_mask2',
         {r = string.format('{"vfwebqq":"%s","hash":"%s"}', self.vfwebqq, webqq.digest(tonumber(self.uin), self.ptwebqq))},
         'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'))
-    if resp_obj['retcode'] ~= 0 then return false end
+    if not resp_obj or resp_obj['retcode'] ~= 0 then return false end
     local list = resp_obj['result']['gnamelist']
     local i, idx = -1
     for i = 1, #list do
@@ -187,7 +187,7 @@ function webqq.find_group(self)
     -- 取得成员列表！
     local resp_obj2 = json:decode(http.post('http://s.web2.qq.com/api/get_group_info_ext2',
         {gcode = list[idx]['code'], vfwebqq = self.vfwebqq, t = os.time() * 1000 }))
-    if resp_obj2['retcode'] ~= 0 then
+    if not resp_obj2 or resp_obj2['retcode'] ~= 0 then
         print('[WARN] Cannot retrieve member list :( Some functionalities may not work')
     else
         local cards = {}
