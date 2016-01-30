@@ -282,6 +282,7 @@ function webqq.check_message(self)
 end
 
 function webqq.send_message(self, text)
+    print('[SENT]', inspect(text))
     local req_body = '{"group_uin":' .. self.group_gid .. ',"content":"['
     if type(text) == 'string' then
         req_body = req_body .. '\\"' .. text:gsub('\n', '\\n') .. '\\",'
