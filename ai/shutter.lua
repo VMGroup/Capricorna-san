@@ -31,20 +31,27 @@ local string_list_match = function (str, tab)
     return false
 end
 
+local orig_send_message
+local dummy_send_message = function (msg) print('[SHUT]', msg) end
+
 ai.register_handler('shutter',
     function (self, storage)
-        storage.is_shut = storage.is_shut or false
-        storage.confirming = storage.confirming or 0
+        -- 每次程序开始运行的时候都不保持沉默
+        storage.is_shut = false
+        storage.confirming = 0
     end,
 
     function (self, uin, message, storage)
         message = message:lower()
+        orig_send_message = orig_send_message or self.send_message
         if storage.confirming > 0 then
             if string_list_match(message, confirm_triggers) then
                 if storage.is_shut then
-                    self.send_message(ai.rand_from(revived_msg))
+                    self.send_message = orig_send_message
+                    orig_send_message(ai.rand_from(revived_msg))
                 else
-                    self.send_message(ai.rand_from(shut_msg))
+                    orig_send_message(ai.rand_from(shut_msg))
+                    self.send_message = dummy_send_message
                 end
                 storage.is_shut = not storage.is_shut
                 storage.confirming = 0
@@ -52,21 +59,21 @@ ai.register_handler('shutter',
             else
                 storage.confirming = storage.confirming + 1
                 if storage.confirming > confirm_dur then
-                    self.send_message(ai.rand_from(cancel_msg))
+                    orig_send_message(ai.rand_from(cancel_msg))
                     storage.confirming = 0
                 end
                 return 0
             end
         elseif storage.is_shut then
             if string_list_match(message, revive_triggers) then
-                self.send_message(ai.rand_from(ask_msg))
+                orig_send_message(ai.rand_from(ask_msg))
                 storage.confirming = 1
                 return 1
             end
             return 2
         else
             if string_list_match(message, shutup_triggers) then
-                self.send_message(ai.rand_from(ask_msg))
+                orig_send_message(ai.rand_from(ask_msg))
                 storage.confirming = 1
                 return 1
             elseif message:find('阿绫') then
