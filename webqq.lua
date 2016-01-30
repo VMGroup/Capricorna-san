@@ -171,7 +171,8 @@ function webqq.find_group(self)
     local resp_obj = json:decode(http.post('http://s.web2.qq.com/api/get_group_name_list_mask2',
         {r = string.format('{"vfwebqq":"%s","hash":"%s"}', self.vfwebqq, webqq.digest(tonumber(self.uin), self.ptwebqq))},
         'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'))
-    if not resp_obj or resp_obj['retcode'] ~= 0 then return false end
+    print(inspect(resp_obj))
+    if not resp_obj or not resp_obj['result']['gnamelist'] then return false end
     local list = resp_obj['result']['gnamelist']
     local i, idx = -1
     for i = 1, #list do
