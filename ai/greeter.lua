@@ -14,7 +14,8 @@ ai.register_handler('greeter',
 local bubble_breaker = {
     '戳',
     '戳（≧∇≦）',
-    '这个给我戳泥们都别抢 ><'
+    '这个给我戳泥们都别抢 ><',
+    '按下去'
 }
 ai.register_handler('greeter',
     function () end,
@@ -99,5 +100,26 @@ ai.register_handler('greeter',
 
     function (self, uin, message)
         self.send_message('叫我么 = =')
+    end
+)
+
+local orz_msg = {
+    '每个人都有自己的闪光点，对于别人的闪光点窝们应该Orz',
+    '三人行必有我师焉',
+    '择其善者而Orz之，其不善者而改之',
+    '众人皆触唯我独渣(ノ_＜)',
+    '死国矣 QwQ'
+}
+ai.register_handler('greeter',
+    function () end,
+
+    function (self, uin, message)
+        message = message:lower()
+        if message:find('orz') or message:find('sro') or message:find('渣') or message:find('角虫') then return 1
+        else return 0 end
+    end,
+
+    function (self, uin, message)
+        self.send_message(ai.rand_from(orz_msg))
     end
 )
