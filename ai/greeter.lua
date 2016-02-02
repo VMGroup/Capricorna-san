@@ -88,3 +88,16 @@ ai.register_handler('greeter',
         end
     end
 )
+
+ai.register_handler('greeter',
+    function () end,
+
+    function (self, uin, message)
+        if message:find('机器人') or message:find('AI') then return 1
+        else return 0 end
+    end,
+
+    function (self, uin, message)
+        self.send_message('叫我么 = =')
+    end
+)
