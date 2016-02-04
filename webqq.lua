@@ -286,16 +286,19 @@ function webqq.send_message(self, text)
     print('[SENT]', inspect(text))
     local req_body = '{"group_uin":' .. self.group_gid .. ',"content":"['
     if type(text) == 'string' then
-        req_body = req_body .. '\\"' .. text:gsub('\n', '\\n') .. '\\",'
+        req_body = req_body .. '\\"' .. text:gsub('\"', '\\\\\\"'):gsub('\n', '\\n') .. '\\",'
     else
         for i = 1, #text do
-            req_body = req_body .. '\\"' .. text[i]:gsub('\n', '\\n') .. '\\",'
+            if type(text[i]) == 'string' then req_body = req_body .. '\\"' .. text[i]:gsub('\"', '\\\\\\"'):gsub('\n', '\\n') .. '\\",'
+            elseif type(text[i]) == 'table' then req_body = req_body .. json:encode(text[i]):gsub('\"', '\\"'):gsub('\n', '\\n') .. ','
+            end
         end
     end
     req_body = req_body
         .. '[\\"font\\",{\\"name\\":\\"宋体\\",\\"size\\":10,\\"style\\":[0,0,0],\\"color\\":\\"000000\\"}]]","face":522,"clientid":'
         .. self.clientid .. ',"msg_id":' .. tostring(math.floor(math.random() * 300000 + 200000))
         .. ',"psessionid":"' .. self.psessionid .. '"}'
+    print(req_body)
     local resp_text = http.post('http://d1.web2.qq.com/channel/send_qun_msg2', {r = req_body}, 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2')
     print(resp_text)
 end
