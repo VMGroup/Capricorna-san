@@ -47,7 +47,7 @@ ai.register_handler('wiki',
         while resp == nil do
             print('Retrieving Wikipedia data...')
             resp = json:decode(http.get(
-                'https://zh.wikipedia.org/w/api.php?format=json&redirects=&action=query&prop=extracts&exintro=&explaintext=&titles=' .. query_str))
+                'https://en.wikipedia.org/w/api.php?format=json&redirects=&action=query&prop=extracts&exintro=&explaintext=&titles=' .. query_str))
         end
         local page
         for k, v in pairs(resp.query.pages) do page = v; break end
@@ -59,6 +59,7 @@ ai.register_handler('wiki',
             self:send_message(ai.rand_from(not_found_msg))
         else
             local text = page.extract:match('^%s*(.-)%s*$')
+            if text:find('\n%^ .+') then text = text:match('(.-)\n%^ .+') end
             local chunks, ct, chunk_num = { '' }, 0, nil
             for pos, charcode in utf8.codes(text) do
                 chunk_num = math.floor(ct / 100) + 1
