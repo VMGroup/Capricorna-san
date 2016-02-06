@@ -12,7 +12,7 @@ ai.register_handler('nominator',
     function () end
 )
 
-local partner_uid = 2 --1963028587
+local partner_uid = 1963028587
 local partner_greet_msg = {
     '又被阿绫抢镜头啦 ＞^＜',
     { '。', '阿绫让窝说几句行不。。' },

@@ -81,7 +81,7 @@ ai.register_handler('greeter',
         elseif (ai.date.time_id >= 223000 or ai.date.time_id < 010000)
             and (message:find('晚安') or message:find('yasumi'))
         then return 1
-        elseif (ai.date.time_id >= 010000 or ai.date.time_id < 040000)
+        elseif (ai.date.time_id >= 010000 and ai.date.time_id < 040000)
             and storage.last_midnight ~= ai.date.day_id
         then return 1
         else return 0 end
@@ -98,7 +98,7 @@ ai.register_handler('greeter',
         else
             storage.last_midnight = ai.date.day_id
             if uid ~= 906321912 then self:send_message(ai.rand_from(midnight_msg))
-            else self:send_message('群主！群主怎么还不睡！')
+            else self:send_message('群主！群主怎么还不睡！(´･Д･)」') end
         end
     end
 )
@@ -113,13 +113,36 @@ local orz_msg = {
 ai.register_handler('greeter',
     function () end,
 
-    function (self, uin, message)
+    function (self, uid, message)
         message = message:lower()
         if message:find('orz') or message:find('sro') or message:find('渣') or message:find('角虫') then return 1
         else return 0 end
     end,
 
-    function (self, uin, message)
+    function (self, uid, message)
         self:send_message(ai.rand_from(orz_msg))
+    end
+)
+
+local manager_msg = {
+    '抓住一只野生的群主 (๑•̀ㅂ•́)و✧',
+    '群主粗线！excited！',
+    '群主大大お帰りなさい～'
+}
+local manager_uid = 4
+ai.register_handler('greeter',
+    function (self, storage)
+        storage.last_catch_manager = storage.last_catch_manager or 0
+    end,
+
+    function (self, uid, message, storage)
+        if uid == manager_uid and storage.last_catch_manager + ai.times.day / 2 < ai.date.epoch then
+            return 2    -- 抓群主也是非常重要的一件事！（逃
+        end
+    end,
+
+    function (self, uid, message, storage)
+        storage.last_catch_manager = ai.date.epoch
+        self:send_message(ai.rand_from(manager_msg))
     end
 )
