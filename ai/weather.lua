@@ -51,7 +51,7 @@ ai.register_handler('weather',
 
     function (self, uin, message)
         local i, resp
-        local city_name = chn_trim(message:sub(1, message:find('天气') - 1))
+        local city_name = chn_trim(message:sub(1, message:find('天气') - 1)):match('.+ (.+)')
         local is_forecast = ((message:find('预报') or message:find('未来') or message:find('明天')
             or message:find('后天') or message:find('下周') or message:find('一周')) ~= nil)
         while resp == nil do
