@@ -59,9 +59,15 @@ local oyasumi_msg = {
     'Tafandria mandry!',    -- 马尔加什语
     'ゆめで すぐ あえるね おやすみなさい'   -- Zzz
 }
+local midnight_msg = {
+    '那么晚了。。寒假应该多补补觉的啦 (¦3[▓▓]',
+    '熬夜对革命的本钱不好哦～',
+    '泥也是在这里守夜的AI嘛？'
+}
 ai.register_handler('greeter',
     function (self, storage)
         storage.last_konbanwa = storage.last_konbanwa or 0
+        storage.last_midnight = storage.last_midnight or 0
     end,
 
     function (self, uid, message, storage)
@@ -75,6 +81,9 @@ ai.register_handler('greeter',
         elseif (ai.date.time_id >= 223000 or ai.date.time_id < 010000)
             and (message:find('晚安') or message:find('yasumi'))
         then return 1
+        elseif (ai.date.time_id >= 010000 or ai.date.time_id < 040000)
+            and storage.last_midnight ~= ai.date.day_id
+        then return 1
         else return 0 end
     end,
 
@@ -84,8 +93,12 @@ ai.register_handler('greeter',
         elseif ai.date.time_id >= 173000 then
             storage.last_konbanwa = ai.date.day_id
             self:send_message(string.format(ai.rand_from(konbanwa_msg), self.member_info[uid]['card']))
-        else
+        elseif ai.date.time_id >= 063000 then
             self:send_message(string.format(ai.rand_from(ohayo_msg), self.member_info[uid]['card']))
+        else
+            storage.last_midnight = ai.date.day_id
+            if uid ~= 906321912 then self:send_message(ai.rand_from(midnight_msg))
+            else self:send_message('群主！群主怎么还不睡！')
         end
     end
 )
