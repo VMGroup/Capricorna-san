@@ -30,6 +30,9 @@ end
 function ai.rand_from(t)
     return t[math.floor(math.random() * #t) + 1]
 end
+function ai.trim_query(s)
+    return s:match(' (.+)')
+end
 function ai.update_time()
     ai.date = os.date('*t')
     ai.date.day_id = ai.date.year * 370 + ai.date.yday

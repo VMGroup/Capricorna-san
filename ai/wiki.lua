@@ -43,11 +43,11 @@ ai.register_handler('wiki',
         end
         storage.last_result = {}
         local i, resp
-        local query_str = message:sub(1, message:find('是') - 1)
+        local query_str = ai.trim_query(message:sub(1, message:find('是') - 1))
         while resp == nil do
             print('Retrieving Wikipedia data...')
             resp = json:decode(http.get(
-                'https://en.wikipedia.org/w/api.php?format=json&redirects=&action=query&prop=extracts&exintro=&explaintext=&titles=' .. query_str))
+                'https://zh.wikipedia.org/w/api.php?format=json&redirects=&action=query&prop=extracts&exintro=&explaintext=&titles=' .. query_str))
         end
         local page
         for k, v in pairs(resp.query.pages) do page = v; break end
