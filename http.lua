@@ -7,6 +7,7 @@ function http.get(url, referer)
     --print('[GET]  ' .. url)
     local handle = io.popen('curl -q -k -s -b ' .. http.cookie_jar .. ' -c ' .. http.cookie_jar .. ' -X GET '
         .. '-e "' .. referer .. '" '
+        .. '-H "Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2"'
         .. '-m 10 "' .. url .. '"', 'r')
     local response = handle:read('*a')
     handle:close()
