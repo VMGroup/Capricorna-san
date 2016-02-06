@@ -14,7 +14,7 @@ ai.register_handler('nominator',
 
 local partner_uid = 1963028587
 local partner_greet_msg = {
-    '又被阿绫抢镜头啦 ＞^＜',
+    '又被阿绫抢镜头啦 (*´>д<)',
     { '。', '阿绫让窝说几句行不。。' },
     { '阿绫又刷屏', '阿绫不准跟窝抢 ＞＜' },
     '啊啊啊阿绫肿么又是你啊QwQ'

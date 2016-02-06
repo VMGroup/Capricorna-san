@@ -127,7 +127,7 @@ ai.register_handler('greeter',
 local manager_msg = {
     '抓住一只野生的群主 (๑•̀ㅂ•́)و✧',
     '群主粗线！excited！',
-    '群主大大お帰りなさい～'
+    '群主大大お帰りなさい～ヾ(*´∀｀*)ﾉ'
 }
 local manager_uid = 4
 ai.register_handler('greeter',
