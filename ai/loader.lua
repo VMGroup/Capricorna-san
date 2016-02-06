@@ -28,7 +28,9 @@ end
 
 -- A helper function
 function ai.rand_from(t)
-    return t[math.floor(math.random() * #t) + 1]
+    local r = t[math.floor(math.random() * #t) + 1]
+    if type(r) == 'table' then return table.unpack(r)
+    else return r end
 end
 function ai.trim_query(s)
     return s:match(' (.+)')
@@ -68,7 +70,12 @@ function ai.create(self, self_info, members_info, ticket)
     ret.message_flyer = ticket      -- 用于发送消息的方法
     ret.send_message = function (self, ...)
         self.last_sent_time = ai.date.epoch
-        self.message_flyer(...)
+        local args = {...}
+        self.message_flyer(args[1])
+        for i = 2, #args do
+            zzz(2)
+            self.message_flyer(args[i])
+        end
     end
 
     ret.init_storage = self.init_storage
