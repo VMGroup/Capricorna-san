@@ -33,7 +33,7 @@ function ai.rand_from(t)
     else return r end
 end
 function ai.trim_query(s)
-    return s:match(' (.+)')
+    return s:match('.+ *(.+)')
 end
 function ai.update_time()
     ai.date = os.date('*t')
