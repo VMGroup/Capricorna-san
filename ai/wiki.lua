@@ -19,7 +19,7 @@ ai.register_handler('wiki',
 
     function (self, uin, message, storage)
         if message:find('是什么') ~= nil or message:find('是.*啥') ~= nil
-            or (storage.last_result and message:find('继续') or message:find('嗯') or message:lower():find('ye[sp]')) ~= nil then return 1
+            or (storage.last_result and (message:find('继续') or message:find('嗯') or message:lower():find('ye[sp]'))) ~= nil then return 1
         else return 0 end
     end,
 
