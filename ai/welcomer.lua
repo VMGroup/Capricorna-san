@@ -34,7 +34,7 @@ ai.register_timer('welcomer',
 
     function (self, storage)
         for i = 1, #welcome_msg do
-            self.send_message(ai.rand_from(welcome_msg[i]))
+            self:send_message(ai.rand_from(welcome_msg[i]))
             zzz(3)
         end
     end
@@ -71,10 +71,10 @@ ai.register_handler('welcomer',
         message = message:lower()
         for i = 1, #downloads do
             if message:find(downloads[i].name) then
-                self.send_message(string.format(ai.rand_from(downloads_msg), downloads[i].full_name, downloads[i].link))
+                self:send_message(string.format(ai.rand_from(downloads_msg), downloads[i].full_name, downloads[i].link))
                 return
             end
         end
-        self.send_message('。。并没有找到泥要的资源哦。。去群资源页 http://vocaloid.yesterday17.cn/resources.html 逛逛？（建设中）')
+        self:send_message('。。并没有找到泥要的资源哦。。去群资源页 http://vocaloid.yesterday17.cn/resources.html 逛逛？（建设中）')
     end
 )

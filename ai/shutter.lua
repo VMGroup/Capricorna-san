@@ -43,15 +43,15 @@ ai.register_handler('shutter',
 
     function (self, uin, message, storage)
         message = message:lower()
-        orig_send_message = orig_send_message or self.send_message
+        orig_send_message = orig_send_message or self.message_flyer
         if storage.confirming > 0 then
             if string_list_match(message, confirm_triggers) then
                 if storage.is_shut then
-                    self.send_message = orig_send_message
+                    self.message_flyer = orig_send_message
                     orig_send_message(ai.rand_from(revived_msg))
                 else
                     orig_send_message(ai.rand_from(shut_msg))
-                    self.send_message = dummy_send_message
+                    self.message_flyer = dummy_send_message
                 end
                 storage.is_shut = not storage.is_shut
                 storage.confirming = 0

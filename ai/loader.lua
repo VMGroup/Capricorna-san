@@ -59,7 +59,12 @@ function ai.create(self, self_info, members_info, ticket)
     ret.storage = nil
     ret.self_info = self_info
     ret.member_info = members_info  -- 为了方便扩展编写以及语义，成员中省略“s” - -（有问题嘛？）
-    ret.send_message = ticket       -- 用于发送消息的方法
+    ret.last_sent = 0               -- 上次发送消息的时间
+    ret.message_flyer = ticket      -- 用于发送消息的方法
+    ret.send_message = function (self, ...)
+        self.last_sent = ai.date.epoch
+        self.message_flyer(...)
+    end
 
     ret.init_storage = self.init_storage
     ret.save_storage = self.save_storage

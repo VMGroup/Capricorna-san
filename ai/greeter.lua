@@ -7,7 +7,7 @@ ai.register_handler('greeter',
     end,
 
     function (self, uin, message)
-        self.send_message('wwwwwwwwwww')
+        self:send_message('wwwwwwwwwww')
     end
 )
 
@@ -26,7 +26,7 @@ ai.register_handler('greeter',
     end,
 
     function (self, uin, message)
-        self.send_message(ai.rand_from(bubble_breaker))
+        self:send_message(ai.rand_from(bubble_breaker))
     end
 )
 
@@ -80,12 +80,12 @@ ai.register_handler('greeter',
 
     function (self, uid, message, storage)
         if ai.date.time_id >= 223000 or ai.date.time_id < 010000 then
-            self.send_message(string.format(ai.rand_from(oyasumi_msg), self.member_info[uid]['card']))
+            self:send_message(string.format(ai.rand_from(oyasumi_msg), self.member_info[uid]['card']))
         elseif ai.date.time_id >= 173000 then
             storage.last_konbanwa = ai.date.day_id
-            self.send_message(string.format(ai.rand_from(konbanwa_msg), self.member_info[uid]['card']))
+            self:send_message(string.format(ai.rand_from(konbanwa_msg), self.member_info[uid]['card']))
         else
-            self.send_message(string.format(ai.rand_from(ohayo_msg), self.member_info[uid]['card']))
+            self:send_message(string.format(ai.rand_from(ohayo_msg), self.member_info[uid]['card']))
         end
     end
 )
@@ -99,7 +99,7 @@ ai.register_handler('greeter',
     end,
 
     function (self, uin, message)
-        self.send_message('叫我么 = =')
+        self:send_message('叫我么 = =')
     end
 )
 
@@ -120,6 +120,6 @@ ai.register_handler('greeter',
     end,
 
     function (self, uin, message)
-        self.send_message(ai.rand_from(orz_msg))
+        self:send_message(ai.rand_from(orz_msg))
     end
 )

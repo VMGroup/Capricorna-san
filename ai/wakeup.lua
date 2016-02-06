@@ -5,6 +5,6 @@ ai.register_timer('wakeup',
     end,
 
     function (self)
-        self.send_message('起床咯')    -- (¦3[▓▓]
+        self:send_message('起床咯')    -- (¦3[▓▓]
     end
 )

@@ -68,14 +68,14 @@ ai.register_handler('weather',
         if tonumber(resp.cod) == 200 then
             resp.orig_name = city_name
             if is_forecast then
-                self.send_message(weather_forecast(resp))
+                self:send_message(weather_forecast(resp))
             else
-                self.send_message(weather_report(resp))
+                self:send_message(weather_report(resp))
             end
         elseif tonumber(resp.cod) == 404 then
-            self.send_message('并不知道泥在说哪个城市啊。。试下“北京天气”这样的说法')
+            self:send_message('并不知道泥在说哪个城市啊。。试下“北京天气”这样的说法')
         else
-            self.send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
+            self:send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
         end
     end
 )
@@ -105,11 +105,11 @@ ai.register_handler('weather',
         if type(resp) ~= 'table' then return end
         if tonumber(resp.cod) == 200 then
             resp.orig_name = city_name
-            self.send_message(sunrise_sunset_report(resp))
+            self:send_message(sunrise_sunset_report(resp))
         elseif tonumber(resp.cod) == 404 then
-            self.send_message('并不知道泥在说哪个城市啊。。试下“北京日出日落”这样的说法')
+            self:send_message('并不知道泥在说哪个城市啊。。试下“北京日出日落”这样的说法')
         else
-            self.send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
+            self:send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
         end
     end
 )
