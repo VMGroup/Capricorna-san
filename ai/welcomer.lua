@@ -58,7 +58,7 @@ ai.register_handler('welcomer',
     function () end,
 
     function (self, uin, message)
-        if message:sub(-6) == '资源' or message:sub(-6) == '下载' then return 1
+        if message:find('资源') or message:find('下载') or message:find('安装包') then return 1
         else return 0 end
     end,
 
