@@ -56,7 +56,6 @@ require 'ai/advertise'
 
 -- Pure timers
 require 'ai/welcomer'
-require 'ai/wakeup'
 require 'ai/nominator_tail'
 
 -- self_info:    机器人帐号的资料，一个 table

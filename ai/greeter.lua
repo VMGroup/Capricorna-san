@@ -90,19 +90,6 @@ ai.register_handler('greeter',
     end
 )
 
-ai.register_handler('greeter',
-    function () end,
-
-    function (self, uin, message)
-        if message:find('机器人') or message:find('AI') then return 1
-        else return 0 end
-    end,
-
-    function (self, uin, message)
-        self:send_message('叫我么 = =')
-    end
-)
-
 local orz_msg = {
     '每个人都有自己的闪光点，对于别人的闪光点窝们应该Orz',
     '三人行必有我师焉',
