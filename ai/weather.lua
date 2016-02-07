@@ -40,6 +40,12 @@ local chn_trim = function (s)
         or s:sub(-6) == '下周' or s:sub(-6) == '一周' then s = s:sub(1, -7) end
     return s
 end
+local unknown_city_msg = {
+    '哪里的天气啊喂！',
+    '并不知道泥在哪里。。',
+    '北京天气？上海天气？California天气？',
+    '亲爱的，悄悄地告诉我你在哪个城市？（阿绫泥的台词借窝用用。。）'
+}
 ai.register_handler('weather',
     function () end,
 
@@ -54,6 +60,10 @@ ai.register_handler('weather',
         local city_name = ai.trim_query(chn_trim(message:sub(1, message:find('天气') - 1)))
         local is_forecast = ((message:find('预报') or message:find('未来') or message:find('明天')
             or message:find('后天') or message:find('下周') or message:find('一周')) ~= nil)
+        if city_name == nil or city_name == '' then
+            self:send_message(ai.rand_from(unknown_city_msg))
+            return
+        end
         while resp == nil do
             print('Retrieving weather data...')
             if is_forecast then
@@ -73,7 +83,7 @@ ai.register_handler('weather',
                 self:send_message(weather_report(resp))
             end
         elseif tonumber(resp.cod) == 404 then
-            self:send_message('并不知道泥在说哪个城市啊。。试下“北京天气”这样的说法')
+            self:send_message(ai.rand_from(unknown_city_msg))
         else
             self:send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
         end
@@ -85,6 +95,10 @@ local sunrise_sunset_report = function (d)
         .. '日出时间：' .. os.date('%H:%M', d.sys.sunrise) .. '；日落时间：' .. os.date('%H:%M', d.sys.sunset)
         .. '\n数据来源：OpenWeatherMap'
 end
+local sunrise_sunset_default_msg = {
+    '日出日落？听上去很有气氛的样子～',
+    '泥们有看过日落嘛。。在家看的也算'
+}
 ai.register_handler('weather',
     function () end,
 
@@ -97,6 +111,10 @@ ai.register_handler('weather',
     function (self, uin, message)
         local i, resp
         local city_name = ai.trim_query(chn_trim(message:sub(1, (message:find('日出') or message:find('日落')) - 1)))
+        if city_name == nil or city_name == '' then
+            self:send_message(ai.rand_from(sunrise_sunset_default_msg))
+            return
+        end
         while resp == nil do
             print('Retrieving weather data...')
             resp = json:decode(http.get(
@@ -107,7 +125,7 @@ ai.register_handler('weather',
             resp.orig_name = city_name
             self:send_message(sunrise_sunset_report(resp))
         elseif tonumber(resp.cod) == 404 then
-            self:send_message('并不知道泥在说哪个城市啊。。试下“北京日出日落”这样的说法')
+            self:send_message('南极日落？Moscow日出？')
         else
             self:send_message('无法取得' .. city_name .. '的天气数据（Return code: ' .. tostring(resp.cod) .. '）T^T')
         end
