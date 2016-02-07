@@ -11,7 +11,8 @@ for i = 1, 12 do
     zodiac_group_members[i] = {
         uin = i,
         card = zodiac[i],
-        nick = zodiac[i]
+        nick = zodiac[i],
+        city = '上海'
     }
 end
 local yagi = ai:create({

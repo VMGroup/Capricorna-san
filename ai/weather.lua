@@ -49,17 +49,20 @@ local unknown_city_msg = {
 ai.register_handler('weather',
     function () end,
 
-    function (self, uin, message)
+    function (self, uid, message)
         local p = message:find('天气')
         if p and p <= 24 then return 1
         else return 0 end
     end,
 
-    function (self, uin, message)
+    function (self, uid, message)
         local i, resp
         local city_name = ai.trim_query(chn_trim(message:sub(1, message:find('天气') - 1)))
         local is_forecast = ((message:find('预报') or message:find('未来') or message:find('明天')
             or message:find('后天') or message:find('下周') or message:find('一周')) ~= nil)
+        city_name = city_name or self.member_info[uid]['city']
+        city_name = city_name or self.member_info[uid]['province']
+        city_name = city_name or self.member_info[uid]['country']
         if city_name == nil or city_name == '' then
             self:send_message(ai.rand_from(unknown_city_msg))
             return
@@ -97,20 +100,23 @@ local sunrise_sunset_report = function (d)
 end
 local sunrise_sunset_default_msg = {
     '日出日落？听上去很有气氛的样子～',
-    '泥们有看过日落嘛。。在家看的也算'
+    '泥们有看过日落嘛。。在家看的也算。。'
 }
 ai.register_handler('weather',
     function () end,
 
-    function (self, uin, message)
+    function (self, uid, message)
         local p = message:find('日出') or message:find('日落')
         if p and p <= 24 then return 1
         else return 0 end
     end,
 
-    function (self, uin, message)
+    function (self, uid, message)
         local i, resp
         local city_name = ai.trim_query(chn_trim(message:sub(1, (message:find('日出') or message:find('日落')) - 1)))
+        city_name = city_name or self.member_info[uid]['city']
+        city_name = city_name or self.member_info[uid]['province']
+        city_name = city_name or self.member_info[uid]['country']
         if city_name == nil or city_name == '' then
             self:send_message(ai.rand_from(sunrise_sunset_default_msg))
             return
