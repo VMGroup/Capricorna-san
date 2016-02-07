@@ -18,14 +18,14 @@ ai.register_handler('wiki',
     end,
 
     function (self, uin, message, storage)
-        if message:find('是什么') ~= nil or message:find('是.*啥') ~= nil
-            or (storage.last_result and (message:find('继续') or message:find('嗯') or message:lower():find('ye[sp]'))) ~= nil then return 1
+        if message:lower():find('wiki') ~= nil
+            or (storage.last_result and not message:find('不') and (message:find('继续') or message:find('嗯') or message:lower():find('ye[sp]'))) ~= nil then return 1
         else return 0 end
     end,
 
     function (self, uin, message, storage)
         -- 如果五分钟以内还有东西没讲完就继续讲。。
-        if storage.last_result ~= nil and storage.last_result.time >= ai.date.epoch - 300 and not message:find('是') then
+        if storage.last_result ~= nil and storage.last_result.time >= ai.date.epoch - 300 and not message:find('Wiki') then
             local finish = storage.last_result.pos + 3  -- inclusive [pos, pos + 3]
             if finish > #storage.last_result.chunks then finish = #storage.last_result.chunks end
             for i = storage.last_result.pos, finish do
@@ -43,7 +43,7 @@ ai.register_handler('wiki',
         end
         storage.last_result = nil
         local i, resp
-        local query_str = ai.trim_query(message:sub(1, message:find('是') - 1))
+        local query_str = ai.trim_query(message:sub(message:lower():find('wiki') + 4, -1))
         while resp == nil do
             print('Retrieving Wikipedia data...')
             resp = json:decode(http.get(
