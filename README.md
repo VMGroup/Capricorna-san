@@ -27,7 +27,14 @@ AI一只，可以为群内成员提供各种服务~\\(≧∇≦)/ （想歪的�
 * 再次执行 `lua main.lua`
 * 呼～～～
 
+* 另外，开启 Web API 的方法：`lua main.lua webapi`
+
 如何编写 AI
 ===========
 
 略（TODO）
+
+如何使用 Web API
+================
+
+细节请见 [Vocaloid学习制作群主页](https://github.com/VMGroup/vmgroup.github.io)
