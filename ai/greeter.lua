@@ -30,6 +30,24 @@ ai.register_handler('greeter',
     end
 )
 
+local redpacket_msg = {
+    '%s 壕壕壕！（然而AI没法抢红包啊啊啊QAQ）',
+    '领不了红包的AI。。祝 %s さん和大家新年快乐～',
+    '%s 壕壕壕～～'
+}
+ai.register_handler('greeter',
+    function () end,
+
+    function (self, uin, message)
+        if message:find('[QQ红包]') then return 1
+        else return 0 end
+    end,
+
+    function (self, uin, message)
+        self:send_message(string.format(ai.rand_from(redpacket_msg), self.member_info[uin]['card']))
+    end
+)
+
 local ohayo_msg = {
     '%s 早',
     '%s 早上好呀',
