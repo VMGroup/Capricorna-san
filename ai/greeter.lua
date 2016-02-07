@@ -39,7 +39,7 @@ ai.register_handler('greeter',
     function () end,
 
     function (self, uin, message)
-        if message:find('[QQ红包]') then return 1
+        if message:find('%[QQ红包%]') then return 1
         else return 0 end
     end,
 
