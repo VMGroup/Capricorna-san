@@ -44,7 +44,7 @@ end
 ai.update_time()
 
 -- Pure triggers
-require 'ai/shutter'
+--[[require 'ai/shutter'
 require 'ai/nominator_head'
 require 'ai/dot_counter'
 require 'ai/weather'
@@ -56,7 +56,7 @@ require 'ai/advertise'
 
 -- Pure timers
 require 'ai/welcomer'
-require 'ai/nominator_tail'
+require 'ai/nominator_tail']]
 
 -- self_info:    机器人帐号的资料，一个 table
 -- members_info: 群成员的资料，以 uin 作为索引，一个 number -> table 的 table
@@ -66,16 +66,21 @@ function ai.create(self, self_info, members_info, ticket)
     ret.self_info = self_info
     ret.member_info = members_info  -- 为了方便扩展编写以及语义，成员中省略“s” - -（有问题嘛？）
     ret.last_sent_time = 0          -- 上次发送消息的时间
+    ret.messages_sent = 0
     ret.message_flyer = ticket      -- 用于发送消息的方法
     ret.send_message = function (self, ...)
         self.last_sent_time = ai.date.epoch
         local args = {...}
         self.message_flyer(args[1])
+        self.messages_sent = self.messages_sent + 1
         for i = 2, #args do
             zzz(2)
             self.message_flyer(args[i])
+            self.messages_sent = self.messages_sent + 1
         end
     end
+
+    ret.get_status = self.get_status
 
     ret.init_storage = self.init_storage
     ret.save_storage = self.save_storage
@@ -95,6 +100,7 @@ function ai.create(self, self_info, members_info, ticket)
         t = ret.storage[ai.timers[i].module] or {}
         ret.storage[ai.timers[i].module] = t
     end
+
     return ret
 end
 
@@ -102,11 +108,22 @@ end
 -- 在创建时自动调用
 function ai.init_storage(self)
     self.storage = saver.load('./ai_storage.txt')
+    self.messages_sent = self.storage._messages_sent or 0
 end
 -- 把AI存储的数据写入到文件
 -- 需要手动调用。。。（这个设计模式似乎略乱诶QAQ）
 function ai.save_storage(self)
+    self.storage._messages_sent = self.messages_sent
     saver.save('./ai_storage.txt', self.storage)
+end
+
+function ai.get_status(self)
+    return {
+        self_info = self.self_info,
+        last_sent_time = self.last_sent_time,
+        messages_sent = self.messages_sent,
+        timestamp = ai.date.epoch
+    }
 end
 
 function ai.update_member_list(self, new_list)
