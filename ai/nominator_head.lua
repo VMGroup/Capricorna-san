@@ -12,7 +12,7 @@ ai.register_handler('nominator',
     function () end
 )
 
-local partner_uid = 1963028587
+local partner_uid = 2
 local partner_greet_msg = {
     '又被阿绫抢镜头啦 (*´>д<)',
     { '。', '阿绫让窝说几句行不。。' },
@@ -20,15 +20,20 @@ local partner_greet_msg = {
     '啊啊啊阿绫肿么又是你啊QwQ'
 }
 ai.register_handler('nominator',
-    function () end,
+    function (self, storage)
+        storage.last_interrupt = storage.last_interrupt or 0
+    end,
 
-    function (self, uid, message)
-        if uid == partner_uid and self.last_sent_time >= ai.date.epoch - 5 then
+    function (self, uid, message, storage)
+        if uid == partner_uid and self.last_sent_time >= ai.date.epoch - 5 and
+            ai.date.epoch >= storage.last_interrupt + ai.times.day / 3
+        then
             return 2    -- 优先级非常高！官方AI肿么可以随便让给其他AI！！
         end
     end,
 
-    function (self)
+    function (self, uid, message, storage)
+        storage.last_interrupt = ai.date.epoch
         self:send_message(ai.rand_from(partner_greet_msg))
     end
 )
