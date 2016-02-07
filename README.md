@@ -12,6 +12,7 @@ AI一只，可以为群内成员提供各种服务~\\(≧∇≦)/ （想歪的�
 * cURL 命令行工具（窝很困啊就不加链接了行不QAQ
 * Lua & liblua
 * 一个安装 QQ、有摄像头的爪机
+* 安装 [Pegasus.lua](https://github.com/EvandroLG/pegasus.lua)
 
 如何运行
 --------
