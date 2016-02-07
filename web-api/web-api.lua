@@ -1,5 +1,5 @@
 pegasus = pegasus or require('pegasus')
-json = json or require('./libs/json')
+json = json or require('./libs/JSON')
 require './saver'
 
 local server = pegasus:new({ port = '25252' })
