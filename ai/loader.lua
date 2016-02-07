@@ -109,11 +109,13 @@ end
 function ai.init_storage(self)
     self.storage = saver.load('./ai_storage.txt')
     self.messages_sent = self.storage._messages_sent or 0
+    self.last_sent_time = self.storage._last_sent_time or 0
 end
 -- 把AI存储的数据写入到文件
 -- 需要手动调用。。。（这个设计模式似乎略乱诶QAQ）
 function ai.save_storage(self)
     self.storage._messages_sent = self.messages_sent
+    self.storage._last_sent_time = self.last_sent_time
     saver.save('./ai_storage.txt', self.storage)
 end
 
