@@ -2,7 +2,7 @@ pegasus = pegasus or require('pegasus')
 json = json or require('./libs/JSON')
 require './saver'
 
-local server = pegasus:new({ port = '25252' })
+local server = pegasus:new({ port = '8080' })
 
 local main_status = function ()
     ai = saver.load('./status.txt')
@@ -17,6 +17,7 @@ local router = function (path)
 end
 
 server:start(function (req, resp)
+    print('Visited ' .. os.date() .. ' from ' .. req.client:getpeername())
     resp:addHeader('Access-Control-Allow-Origin', '*')
         :addHeader('Content-Type', 'application/json; charset=utf-8')
         :write(router(req:path()))
