@@ -190,7 +190,7 @@ function webqq.find_group(self)
     local resp_obj2 = json:decode(http.post('http://s.web2.qq.com/api/get_group_info_ext2',
         {gcode = list[idx]['code'], vfwebqq = self.vfwebqq, t = os.time() * 1000 }))
     if not resp_obj2 or resp_obj2['retcode'] ~= 0 then
-        print('[WARN] Cannot retrieve member list :( Some functionalities may not work')
+        return false
     else
         local cards = {}
         local card_list = resp_obj2['result']['cards']
