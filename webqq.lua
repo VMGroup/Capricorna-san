@@ -172,7 +172,7 @@ function webqq.find_group(self)
         {r = string.format('{"vfwebqq":"%s","hash":"%s"}', self.vfwebqq, webqq.digest(tonumber(self.uin), self.ptwebqq))},
         'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'))
     print(inspect(resp_obj))
-    if not resp_obj or not resp_obj['result']['gnamelist'] then return false end
+    if not resp_obj or not resp_obj['result'] or not resp_obj['result']['gnamelist'] then return false end
     local list = resp_obj['result']['gnamelist']
     local i, idx = -1
     for i = 1, #list do
