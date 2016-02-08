@@ -124,6 +124,7 @@ function ai.get_status(self)
         self_info = self.self_info,
         last_sent_time = self.last_sent_time,
         messages_sent = self.messages_sent,
+        is_muted = self.storage['shutter'].is_shut,
         timestamp = ai.date.epoch
     }
 end
