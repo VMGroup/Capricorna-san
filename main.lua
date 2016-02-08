@@ -1,6 +1,6 @@
 -- 最近这边越来越乱了QAQ 不行不行一定要找个空重构QAQ ← flag
 -- 很多解释都在 ai/loader.lua 里面。。
-if arg[1] == 'webapi' then
+if arg[1] == 'weblistener' then
     os.execute('lua web-api/web-api.lua')
 else
     require 'zzz'
