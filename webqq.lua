@@ -85,6 +85,7 @@ function webqq.retrieve_qrcode(self)
                 print('Nearly there! I can see you\'re holding your phone ←_←')
             end
         end
+        os.remove('login.png')
         if status == 0 then
             print('QR code verified! Just a few more seconds!')
             local one_more_url = string.match(status_text, "ptuiCB%('%d-',.-'%d-',.-'(.-)'")
