@@ -45,7 +45,7 @@ ai.update_time()
 
 -- Pure triggers
 require 'ai/shutter'
-require 'ai/nominator_head'
+--[[require 'ai/nominator_head'
 require 'ai/dot_counter'
 require 'ai/weather'
 require 'ai/wiki'
@@ -56,7 +56,7 @@ require 'ai/advertise'
 
 -- Pure timers
 require 'ai/welcomer'
-require 'ai/nominator_tail'
+require 'ai/nominator_tail']]
 
 -- self_info:    机器人帐号的资料，一个 table
 -- members_info: 群成员的资料，以 uin 作为索引，一个 number -> table 的 table
@@ -81,6 +81,7 @@ function ai.create(self, self_info, members_info, ticket)
     end
 
     ret.get_status = self.get_status
+    ret.process_commands = self.process_commands
 
     ret.init_storage = self.init_storage
     ret.save_storage = self.save_storage
@@ -119,6 +120,8 @@ function ai.save_storage(self)
     saver.save('ai_storage.txt', self.storage)
 end
 
+-- Web API 用。主循环（main.lua）中会把这里返回的东西写入 status.txt
+-- 然后 HTTP listener 会从 status.txt 读取数据返回给调用者
 function ai.get_status(self)
     return {
         self_info = self.self_info,
@@ -127,6 +130,18 @@ function ai.get_status(self)
         is_muted = self.storage['shutter'].is_shut,
         timestamp = ai.date.epoch
     }
+end
+-- Web API 用。如果有来自 Web API 的命令（比如静音/取消静音），将会被写入 commands.txt，最后作为 data 进入这里处理（详见 main.lua）
+-- 此次处理过后，commands.txt 会由主循环删除，所以不用判重啦～
+-- 似乎说得不是很清楚的样子。。嘛感觉代码还是挺好理解的 =w=
+function ai.process_commands(self, data)
+    if data['MUTE'] then
+        self.storage['shutter'].is_shut = true
+        self.storage['shutter'].confirming = 0
+    elseif data['UNMUTE'] then
+        self.storage['shutter'].is_shut = false
+        self.storage['shutter'].confirming = 0
+    end
 end
 
 function ai.update_member_list(self, new_list)

@@ -10,8 +10,19 @@ local main_status = function ()
     return json:encode(ai)
 end
 
+local mute = function ()
+    saver.save('commands.txt', { MUTE = true })
+    return '{}'
+end
+local unmute = function ()
+    saver.save('commands.txt', { UNMUTE = true })
+    return '{}'
+end
+
 local router = function (path)
     if path == '/' then return main_status()
+    elseif path == '/mute' then return mute()
+    elseif path == '/unmute' then return unmute()
     else return ''
     end
 end

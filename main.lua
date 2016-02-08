@@ -1,3 +1,5 @@
+-- 最近这边越来越乱了QAQ 不行不行一定要找个空重构QAQ ← flag
+-- 很多解释都在 ai/loader.lua 里面。。
 if arg[1] == 'webapi' then
     os.execute('lua web-api/web-api.lua')
 else
@@ -9,6 +11,9 @@ else
     -- Here we go (๑•̀ㅂ•́)و✧
     while true do
         if arg[1] ~= 'disable-webapi' then
+            local status = saver.load('commands.txt')
+            bot.ai:process_commands(status)
+            saver.save('commands.txt', {})
             saver.save('status.txt', bot.ai:get_status())
         end
         -- 里面调用的cURL会自动等待直到收到消息。。所以不用zzz
