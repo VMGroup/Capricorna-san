@@ -1,5 +1,5 @@
 http = {}
-http.cookie_jar = 'cookies.txt'
+http.cookie_jar = 'data/cookies.txt'
 local inspect = require('./libs/inspect')
 
 function http.get(url, referer)

@@ -5,7 +5,7 @@ require './saver'
 local server = pegasus:new({ port = '8080' })
 
 local main_status = function ()
-    ai = saver.load('./status.txt')
+    ai = saver.load('status.txt')
     ai.self_info.vfwebqq = nil
     return json:encode(ai)
 end

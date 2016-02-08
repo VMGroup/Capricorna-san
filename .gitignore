@@ -1,8 +1,5 @@
 *~
 backups/
+data/
 login.png
-cookies.txt
 *.so
-ai_storage.txt
-webqq_cache.txt
-status.txt

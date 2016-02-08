@@ -107,7 +107,7 @@ end
 -- 加载AI存储的数据
 -- 在创建时自动调用
 function ai.init_storage(self)
-    self.storage = saver.load('./ai_storage.txt')
+    self.storage = saver.load('ai_storage.txt')
     self.messages_sent = self.storage._messages_sent or 0
     self.last_sent_time = self.storage._last_sent_time or 0
 end
@@ -116,7 +116,7 @@ end
 function ai.save_storage(self)
     self.storage._messages_sent = self.messages_sent
     self.storage._last_sent_time = self.last_sent_time
-    saver.save('./ai_storage.txt', self.storage)
+    saver.save('ai_storage.txt', self.storage)
 end
 
 function ai.get_status(self)
