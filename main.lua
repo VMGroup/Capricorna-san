@@ -11,9 +11,12 @@ else
     -- Here we go (๑•̀ㅂ•́)و✧
     while true do
         if arg[1] ~= 'disable-webapi' then
-            local status = saver.load('commands.txt')
-            bot.ai:process_commands(status)
-            saver.save('commands.txt', {})
+            local commands = saver.load('commands.txt')
+            if commands then
+                print(os.time(), 'Commands', inspect(commands))
+                bot.ai:process_commands(commands)
+                saver.save('commands.txt', nil)
+            end
             saver.save('status.txt', bot.ai:get_status())
         end
         -- 里面调用的cURL会自动等待直到收到消息。。所以不用zzz
