@@ -16,7 +16,7 @@ for i = 1, 12 do
     }
 end
 local yagi = ai:create({
-    nick = 'Yagi'
+    nick = 'Cap'
 }, zodiac_group_members, function (m) print(m) end)
 
 local t = io.read('*l')
@@ -24,6 +24,7 @@ local sender = 12
 local try_sender
 while t do
     yagi:check_time()
+    yagi:save_storage()
     try_sender = string.match(t, 'sender (%d+)')
     try_newcomer = string.match(t, 'newcomer (.+)')
     if try_sender then
