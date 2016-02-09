@@ -1,7 +1,7 @@
 inspect = inspect or require('./libs/inspect')
 require 'saver'
 
-ai = { handlers = {}, timers = {} }
+ai = { handlers = {}, timers = {}, filters = {} }
 -- AI的核心就是这里辣
 -- module:  模块名称，用于读取存储的数据
 -- init:    初始化方法
@@ -24,6 +24,15 @@ ai.times = { season = 7884000, month = 2592000, week = 604800, day = 86400, hour
 function ai.register_timer(module, min_intv, checker, action)
     ai.timers[#ai.timers + 1] =
         { module = module, min_intv = min_intv, checker = checker, action = action, last_triggered = 0 }
+end
+
+-- 安检！尤其是防止自己刷屏！！（是群里的乃们逼窝这么做的啊 QAQ）
+-- module: 模块名称
+-- init:   初始化，接收参数 (self, storage)
+-- filter: 动作。接收参数 (self, message [string], storage)，返回一个 string 作为最终要发送的内容或者 nil 表示不更改。
+function ai.register_secchk(module, init, filter)
+    ai.filters[#ai.filters + 1] =
+        { module = module, init = init, filter = filter }
 end
 
 -- A helper function
@@ -71,11 +80,20 @@ function ai.create(self, self_info, members_info, ticket)
     ret.send_message = function (self, ...)
         self.last_sent_time = ai.date.epoch
         local args = {...}
-        self.message_flyer(args[1])
+        local final_msgs = {}
+        for i = 1, #args do
+            local r = args[i]
+            for j = 1, #ai.filters do
+                r = ai.filters[j].filter(self, r, self.storage[ai.filters[j].module]) or r
+            end
+            if r:len() ~= 0 then final_msgs[#final_msgs + 1] = r end
+        end
+        if #final_msgs == 0 then return end
+        self.message_flyer(final_msgs[1])
         self.messages_sent = self.messages_sent + 1
-        for i = 2, #args do
+        for i = 2, #final_msgs do
             zzz(2)
-            self.message_flyer(args[i])
+            self.message_flyer(final_msgs[i])
             self.messages_sent = self.messages_sent + 1
         end
     end
@@ -100,6 +118,11 @@ function ai.create(self, self_info, members_info, ticket)
     for i = 1, #ai.timers do
         t = ret.storage[ai.timers[i].module] or {}
         ret.storage[ai.timers[i].module] = t
+    end
+    for i = 1, #ai.filters do
+        t = ret.storage[ai.filters[i].module] or {}
+        ai.filters[i].init(ret, t)
+        ret.storage[ai.filters[i].module] = t
     end
 
     return ret

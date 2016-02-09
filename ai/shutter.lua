@@ -85,3 +85,32 @@ ai.register_handler('shutter',
 
     function () end
 )
+
+-- 熔断机制（大雾
+local initiative_shut_msg = {
+    '哼。。不理你们了 ＞^＜',
+    '刷屏太多了啦',
+    'QAQ',
+    '不玩了不玩了 (´Д` )'
+}
+ai.register_secchk('shutter',
+    function (self, storage)
+        storage.last_minute = storage.last_minute or 0
+        storage.last_minute_ct = storage.last_minute_ct or 0
+    end,
+
+    function (self, message, storage)
+        local cur_minute = math.floor(ai.date.epoch / 60)
+        if cur_minute == storage.last_minute then
+            storage.last_minute_ct = storage.last_minute_ct + 1
+            if storage.last_minute_ct > 5 then
+                if storage.last_minute_ct % 8 == 0 then
+                    return ai.rand_from(initiative_shut_msg)
+                else return '' end
+            end
+        else
+            storage.last_minute = cur_minute
+            storage.last_minute_ct = 1
+        end
+    end
+)
