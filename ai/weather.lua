@@ -51,14 +51,17 @@ ai.register_handler('weather',
 
     function (self, uid, message)
         local p = message:find('天气')
-        if p and p <= 24 then return 1
+        if p and p <= 24 and message:lower():find('cap') then return 1
         else return 0 end
     end,
 
     function (self, uid, message)
         local i, resp
-        local city_name = ai.trim_query(chn_trim(message:sub(5, message:find('天气') - 1)))
-        local is_callCap = (message:sub(1, 4) == 'Cap ')
+        -- ai.trim_query 会把“cap 上海”中最后一个空格之前的东西全部丢掉
+        -- 所以直接以“天气”的位置截断就好辣
+        -- 但是！在这之前！窝们可以先用一个 sub 去掉“cap”！这样不加空格也不怕啦wwwww
+        message = message:sub(message:lower():find('cap') + 3)
+        local city_name = ai.trim_query(chn_trim(message:sub(1, message:find('天气') - 1)))
         local is_forecast = ((message:find('预报') or message:find('未来') or message:find('明天')
             or message:find('后天') or message:find('下周') or message:find('一周')) ~= nil)
         if city_name == nil or city_name == '' then city_name = self.member_info[uid]['city'] end
