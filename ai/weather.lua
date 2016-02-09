@@ -57,7 +57,8 @@ ai.register_handler('weather',
 
     function (self, uid, message)
         local i, resp
-        local city_name = ai.trim_query(chn_trim(message:sub(1, message:find('天气') - 1)))
+        local city_name = ai.trim_query(chn_trim(message:sub(5, message:find('天气') - 1)))
+        local is_callCap = (message:sub(1, 4) == 'Cap ')
         local is_forecast = ((message:find('预报') or message:find('未来') or message:find('明天')
             or message:find('后天') or message:find('下周') or message:find('一周')) ~= nil)
         if city_name == nil or city_name == '' then city_name = self.member_info[uid]['city'] end
