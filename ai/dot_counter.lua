@@ -19,21 +19,18 @@ ai.register_handler('dot_counter',
     function (self, uid, message, storage)
         -- Perfect! http://stackoverflow.com/questions/11152220
         local _, ct = string.gsub(message, '。', '')
-        local l1, l2 = math.floor(storage.total / 100), math.floor((storage.members[uid] or 0) / 50)
+        local l1, l2 = math.floor(storage.total / 500), math.floor((storage.members[uid] or 0) / 200)
     
         if ct <= 3 then
             storage.total = storage.total + ct
             storage.members[uid] = (storage.members[uid] or 0) + ct
         end
-        
-        math.randomseed(os.time())
-        if math.floor(storage.total / 100) > l1 and math.random(100) == 1 then
-            self:send_message(string.format(ai.rand_from(dct_groupmsg), storage.total - storage.total % 100))
+        if math.floor(storage.total / 500) > l1 then
+            self:send_message(string.format(ai.rand_from(dct_groupmsg), storage.total - storage.total % 500))
         end
-        
-        if math.floor(storage.members[uid] / 50) > l2 and math.random(100) == 1 then
+        if math.floor(storage.members[uid] / 200) > l2 then
             self:send_message(string.format(ai.rand_from(dct_membermsg),
-                self.member_info[uid]['card'], storage.members[uid] - storage.members[uid] % 50))
+                self.member_info[uid]['card'], storage.members[uid] - storage.members[uid] % 200))
         end
         
         return 0
