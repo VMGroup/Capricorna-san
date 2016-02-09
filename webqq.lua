@@ -227,8 +227,8 @@ end
 function webqq.login(self)
     print('Logging in')
     while not self:is_logged_in() do self:retrieve_qrcode() end
-    while not self:get_pass() do print('Cannot get the passport T^T Retrying') end
-    while not self:find_group() do print('Cannot retrieve group data T^T Retrying') end
+    while not self:get_pass() do print('Cannot get the passport T^T Retrying') zzz(5) end
+    while not self:find_group() do print('Cannot retrieve group data T^T Retrying') zzz(5) end
     print('Log in successful! （≧∇≦）')
     self:init_ai()
     print('AI is up! ☆*:.｡. o(≧▽≦)o .｡.:*☆')
@@ -351,7 +351,7 @@ function webqq.handle_message(self, send_time, account, messages, full_data)
         local old_members = {}
         for i, _ in pairs(self.members) do old_members[i] = true end
         print('Updating members list')
-        while not self:find_group() do print('Cannot retrieve group data T^T Retrying') end
+        while not self:find_group() do print('Cannot retrieve group data T^T Retrying') zzz(5) end
         for i, _ in pairs(self.members) do
             if not old_members[i] then self.members[i].is_newcomer = true end
         end
