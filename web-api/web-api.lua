@@ -28,7 +28,8 @@ local router = function (path)
 end
 
 server:start(function (req, resp)
-    print('Visited ' .. os.date() .. ' from ' .. req.client:getpeername())
+    local ip, port = req.client:getpeername()
+    print('Visited ' .. os.date() .. ' from ' .. ip .. ':' .. port)
     resp:addHeader('Access-Control-Allow-Origin', '*')
         :addHeader('Content-Type', 'application/json; charset=utf-8')
         :write(router(req:path()))
