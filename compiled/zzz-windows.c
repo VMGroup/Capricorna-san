@@ -5,8 +5,8 @@
 
 static int zzz(lua_State *L)
 {
-    long msec = lua_tointeger(L, -1);
-    Sleep(msec);
+    long sec = lua_tointeger(L, -1);
+    Sleep(sec * 1000);
     return 0;
 }
 
