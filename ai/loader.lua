@@ -58,6 +58,7 @@ require 'ai/nominator_head'
 require 'ai/dot_counter'
 require 'ai/weather'
 require 'ai/wiki'
+require 'ai/learn'
 
 -- Hybrid
 require 'ai/greeter'
