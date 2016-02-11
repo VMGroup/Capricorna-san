@@ -27,7 +27,7 @@ AI一只，可以为群内成员提供各种服务~\\(≧∇≦)/ （想歪的�
 * 回到项目目录，打开 `cookies.txt`，用新的 skey 替换原来的 skey（二者可能相同，不用理会即可）
 * 再次执行 `lua main.lua`
 * 呼～～～
-* AI 运行起来之后，用新的进程开启 Web API：`lua main.lua weblistener`（不想写多线程。。Lua 携程似乎并不可行的样子。。）
+* AI 运行起来之后，用新的进程开启 Web API：`lua main.lua weblistener`（不想写多线程。。Lua 协程似乎并不可行的样子。。）
 * 如果泥并不需要 Web API：第2、9步运行 AI 时使用 `lua main.lua disable-webapi` 可以略微（！）加快程序效率。。
 
 如何编写 AI
