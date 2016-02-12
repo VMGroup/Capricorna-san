@@ -175,17 +175,16 @@ end
 
 function ai.handle(self, uin, message)
     local i, t
-    local one_idx, two_idx = -1, -1
+    local max_prio, slct_idx = 0, -1
     for i = 1, #ai.handlers do
         t = ai.handlers[i].checker(self, uin, message, self.storage[ai.handlers[i].module])
-        if t == 2 and two_idx == -1 then two_idx = i
-        elseif t == 1 and one_idx == -1 then one_idx = i
+        if t and t > max_prio then
+            max_prio = t
+            slct_idx = i
         end
     end
-    if two_idx ~= -1 then
-        ai.handlers[two_idx].action(self, uin, message, self.storage[ai.handlers[two_idx].module])
-    elseif one_idx ~= -1 then
-        ai.handlers[one_idx].action(self, uin, message, self.storage[ai.handlers[one_idx].module])
+    if max_prio > 0 then
+        ai.handlers[slct_idx].action(self, uin, message, self.storage[ai.handlers[slct_idx].module])
     end
     -- 如果没有一个handler匹配的话就会窥屏
     -- TODO: 要不要加一个default_handler用于取代窥屏的动作。。？

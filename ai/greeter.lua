@@ -2,7 +2,7 @@ ai.register_handler('greeter',
     function () end,
 
     function (self, uin, message)
-        if message == 'ww' then return 1
+        if message == 'ww' then return 0.5
         else return 0 end
     end,
 
@@ -21,7 +21,7 @@ ai.register_handler('greeter',
     function () end,
 
     function (self, uin, message)
-        if math.random() < 0.5 and (message == '冒' or message:find('冒泡')) then return 1
+        if math.random() < 0.8 and (message == '冒' or message:find('冒泡')) then return 0.5
         else return 0 end
     end,
 
@@ -133,7 +133,8 @@ ai.register_handler('greeter',
 
     function (self, uid, message)
         message = message:lower()
-        if message:find('orz') or message:find('sro') or message:find('渣') or message:find('角虫') then return 1
+        if math.random() < 0.3 and
+            (message:find('orz') or message:find('sro') or message:find('渣') or message:find('角虫')) then return 0.5
         else return 0 end
     end,
 
