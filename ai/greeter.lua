@@ -165,3 +165,16 @@ ai.register_handler('greeter',
         self:send_message(ai.rand_from(manager_msg))
     end
 )
+
+-- 自动签到！！
+-- 继发红包、逛空间、撤回消息之后，本AI又一次刷新群成员三观
+ai.register_timer('greeter',
+    ai.times.minute * 5,
+    function (self)
+        return (ai.date.time_id < 000500)
+    end,
+
+    function (self)
+        self:send_message('签')
+    end
+)
