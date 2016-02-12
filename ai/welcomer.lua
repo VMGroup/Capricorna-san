@@ -78,3 +78,16 @@ ai.register_handler('welcomer',
         end
     end
 )
+
+ai.register_handler('welcomer',
+    function () end,
+
+    function (self, uid, message, storage)
+        if message:lower():find('cap') and (message:find('群网站') or message:find('群主页')) then return 1
+        else return 0 end
+    end,
+
+    function (self)
+        self:send_message('http://vocaloid.yesterday17.cn/')
+    end
+)
