@@ -55,10 +55,10 @@ ai.update_time()
 -- Pure triggers
 require 'ai/shutter'
 require 'ai/nominator_head'
+require 'ai/learn_head'
 require 'ai/dot_counter'
 require 'ai/weather'
 require 'ai/wiki'
-require 'ai/learn'
 
 -- Hybrid
 require 'ai/greeter'
@@ -66,6 +66,7 @@ require 'ai/advertise'
 
 -- Pure timers
 require 'ai/welcomer'
+require 'ai/learn_tail'
 require 'ai/nominator_tail'
 
 -- self_info:    机器人帐号的资料，一个 table
