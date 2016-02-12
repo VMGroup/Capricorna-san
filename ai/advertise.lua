@@ -3,7 +3,8 @@ ai.register_handler('advertise',
     end,
 
     function (self, uid, message, storage)
-        if message:sub(1, 6) == '安利' or message == '取消安利' then return 1
+        if (message:sub(1, 6) == '安利' and not message:find('一下') and not message:find('一发'))
+            or message == '取消安利' then return 1
         else return 0 end
     end,
 
@@ -29,9 +30,9 @@ ai.register_timer('advertise',
         local list = {}
         for k, v in pairs(storage) do list[#list + 1] = {k, v} end
         if #list == 0 then return end
-        local i = ai.rand_from(list)
+        local sender, text = ai.rand_from(list)
         self:send_message(
             '定时安利 [' .. os.date('%Y-%m-%d %H点整') .. ']\n'
-            .. i[2] .. '\n——来自 ' .. self.member_info[i[1]].nick)
+            .. text .. '\n——来自 ' .. self.member_info[sender].nick)
     end
 )
