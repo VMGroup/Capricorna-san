@@ -50,3 +50,17 @@ AI一只，可以为群内成员提供各种服务~\\(≧∇≦)/ （想歪的�
 ----------------
 
 细节请见 [Vocaloid学习制作群主页](https://github.com/VMGroup/vmgroup.github.io)
+
+闲扯时间
+--------
+
+**Capricorna** is brought to you by developers including **Pisces** together with the library **Pegasus.lua**. Cool astronomy right?
+
+本神奇的AI曾经：
+* 发红包抢红包
+* 逛空间，点赞转发
+* 撤回消息
+* 回复私戳消息并通过图灵测试
+* 在群内另一个机器人“乐正绫”处每天签到
+
+其中除最后一项外均在高(ren)级(gong)模式下完成。
