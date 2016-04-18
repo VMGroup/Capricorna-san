@@ -38,7 +38,7 @@ AI一只，可以为群内成员提供各种服务~\\(≧∇≦)/ （想歪的�
 如何测试 AI
 -----------
 
-`lua ai_test.lua`
+`$ lua ai_test.lua`
 
 * 发送消息：直接输入消息回车即可
 * 更改用户：`sender <uid>`
@@ -46,10 +46,10 @@ AI一只，可以为群内成员提供各种服务~\\(≧∇≦)/ （想歪的�
 
 程序开始时会建立12个用户（Aries ~ Pisces），不触发 `welcomer` 模块，默认使用 Pisces 进行发送。
 
-如何使用 Web API
+如何使用 Web API 查询 AI 状态信息
 ----------------
 
-细节请见 [Vocaloid学习制作群主页](https://github.com/VMGroup/vmgroup.github.io)
+细节请见 [Vocaloid学习制作群主页](https://github.com/VMGroup/vmgroup.github.io) 中的 AI 状态页面
 
 闲扯时间
 --------
